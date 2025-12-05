@@ -1,0 +1,102 @@
+{% extends '_base.html' %}
+
+{% block title %}Submission Detail · CampusConnect{% endblock %}
+
+{% block head_extra %}
+<style>
+  pre { white-space: pre-wrap; word-wrap: break-word; }
+  .surface { background: var(--card-bg, var(--gray-50)); color: var(--card-fg, var(--gray-900)); border: 1px solid var(--card-border, var(--gray-200)); }
+  .muted { color: var(--muted-color, var(--gray-600)); }
+  .divider { border-top: 1px solid var(--divider, var(--gray-300)); }
+
+  @media (prefers-color-scheme: dark) {
+    .surface { background: var(--card-bg-dark, #1f2937); color: #e5e7eb; border-color: #374151; }
+    .muted { color: #9ca3af; }
+    .divider { border-color: #4b5563; }
+    .text-slate-800 { color: #e5e7eb !important; }
+    .text-slate-700 { color: #e5e7eb !important; }
+    .text-slate-600 { color: #9ca3af !important; }
+    .bg-slate-50 { background: #1f2937 !important; }
+    .bg-white { background: #0b1220 !important; }
+    .border-slate-200 { border-color: #374151 !important; }
+    .border-slate-300 { border-color: #334155 !important; }
+    /* Pastel boxes for plagiarism states */
+    .bg-red-100 { background: #7f1d1d !important; color: #fecaca; border-color: #ef4444; }
+    .bg-yellow-100 { background: #78350f !important; color: #fde68a; border-color: #f59e0b; }
+    .bg-green-100 { background: #064e3b !important; color: #bbf7d0; border-color: #10b981; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <header class="header header--brand" role="banner">
+    <h1 class="header-title">Submission by {{ submission['student_username'] }}</h1>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="{{ url_for('faculty.view_submissions', assignment_id=submission['assignment_id']) }}">Back to Submissions</a>
+      {% if submission['file_name'] %}
+        <a href="{{ url_for('faculty.view_submission_file', submission_id=submission['id']) }}">View File</a>
+      {% endif %}
+      <a href="{{ url_for('faculty.download_submission', submission_id=submission['id']) }}">Download as .txt</a>
+      <a href="{{ url_for('auth.logout') }}" class="text-red-600">Logout</a>
+    </nav>
+  </header>
+
+  <main class="container" role="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-4">
+          {% for category, message in messages %}
+            <div class="alert {{ 'alert-danger' if category == 'danger' else 'alert-success' }}" role="alert">
+              <p class="font-bold">{{ category.capitalize() }}</p>
+              <p>{{ message }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <section class="lg:col-span-2 bg-slate-50 border border-slate-200 rounded-xl p-5">
+        <h2 class="text-xl font-bold text-slate-800 mb-3">Submitted Content</h2>
+        {% if submission['file_name'] %}
+          <p class="text-slate-600 italic">File: {{ submission['file_name'] }} ({{ submission['file_type'] or 'unknown type' }}, {{ submission['file_size'] or '?' }} bytes)</p>
+        {% endif %}
+        <pre class="mt-3 text-slate-800 bg-white border border-slate-200 rounded-lg p-4">{{ submission['content'] }}</pre>
+      </section>
+
+      <aside class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+        <h2 class="text-xl font-bold text-slate-800">Grading</h2>
+        <form class="mt-4 space-y-4" method="POST" action="{{ url_for('faculty.grade_submission', submission_id=submission['id']) }}">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700" for="grade">Grade (0-100)</label>
+            <input class="mt-1 w-full border border-slate-300 rounded-lg p-2" id="grade" name="grade" type="number" min="0" max="100" required value="{{ submission['grade'] if submission['grade'] is not none else '' }}" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700" for="feedback">Feedback</label>
+            <textarea class="mt-1 w-full border border-slate-300 rounded-lg p-2" id="feedback" name="feedback" rows="4" placeholder="Write feedback for the student...">{{ submission['feedback'] or '' }}</textarea>
+          </div>
+          <button class="btn btn-primary" type="submit">Save Grade</button>
+        </form>
+
+        <div class="mt-6">
+          <h3 class="text-lg font-bold text-slate-800">Plagiarism</h3>
+          <div class="mt-2 p-4 rounded-lg
+            {% if overall_similarity > 60 %} bg-red-100 border-l-4 border-red-500
+            {% elif overall_similarity > 20 %} bg-yellow-100 border-l-4 border-yellow-500
+            {% else %} bg-green-100 border-l-4 border-green-500 {% endif %}">
+            <p class="font-bold">Overall Similarity: {{ overall_similarity }}%</p>
+            {% if plagiarism_report %}
+              <ul class="list-disc list-inside mt-2 space-y-1">
+                {% for item in plagiarism_report %}
+                  <li>{{ item.similarity }} match with another submission by <strong>{{ item.source_user }}</strong>.</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="text-slate-700">No significant similarity found with other submissions.</p>
+            {% endif %}
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+{% endblock %}

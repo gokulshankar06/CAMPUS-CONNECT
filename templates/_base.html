@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}CampusConnect{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% block head_extra %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Theme Toggle (in header area) -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">
+        <i class="fas fa-moon"></i>
+    </button>
+    {% block content %}{% endblock %}
+    {% block scripts_extra %}{% endblock %}
+    <script>
+      (function() {
+        const STORAGE_KEY = 'cc_theme';
+        const root = document.documentElement;
+        const btn = document.getElementById('themeToggle');
+
+        function applyTheme(theme) {
+          if (theme === 'violet-dark') {
+            root.setAttribute('data-theme', 'violet-dark');
+            btn.innerHTML = '<i class="fas fa-sun"></i>';
+            btn.setAttribute('aria-label', 'Switch to light theme');
+            btn.title = 'Switch to light theme';
+          } else {
+            root.setAttribute('data-theme', 'violet-light');
+            btn.innerHTML = '<i class="fas fa-moon"></i>';
+            btn.setAttribute('aria-label', 'Switch to dark theme');
+            btn.title = 'Switch to dark theme';
+          }
+        }
+
+        // Initialize theme from storage or default to light
+        const saved = localStorage.getItem(STORAGE_KEY) || 'violet-light';
+        applyTheme(saved);
+
+        btn.addEventListener('click', () => {
+          const current = root.getAttribute('data-theme') || 'violet-light';
+          const next = current === 'violet-dark' ? 'violet-light' : 'violet-dark';
+          localStorage.setItem(STORAGE_KEY, next);
+          applyTheme(next);
+        });
+
+        // Keyboard accessibility
+        btn.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            btn.click();
+          }
+        });
+      })();
+    </script>
+    <script src="{{ url_for('static', filename='ui.js') }}" defer></script>
+  </body>
+</html>

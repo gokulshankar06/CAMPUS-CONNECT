@@ -1,0 +1,64 @@
+{% extends '_base.html' %}
+
+{% block title %}Notifications · CampusConnect{% endblock %}
+
+{% block head_extra %}
+<style>
+  .surface { background: var(--card-bg, var(--gray-50)); color: var(--card-fg, var(--gray-900)); border: 1px solid var(--card-border, var(--gray-200)); }
+  .muted { color: var(--muted-color, var(--gray-600)); }
+  .note { border-left-width: 4px; }
+
+  @media (prefers-color-scheme: dark) {
+    .surface { background: var(--card-bg-dark, #1f2937); color: #e5e7eb; border-color: #374151; }
+    .muted { color: #9ca3af; }
+    .text-slate-500 { color: #9ca3af !important; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <header class="header header--brand" role="banner">
+    <h1 class="header-title"><i class="fas fa-bell"></i> Notifications</h1>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('auth.logout') }}" class="text-red-600">Logout</a>
+    </nav>
+  </header>
+
+  <main class="container" role="main">
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">Your Recent Notifications</h2>
+      </div>
+      <div class="space-y-3">
+        {% if notifications %}
+          {% for notification in notifications %}
+            <div class="surface rounded-lg p-4 {{ '' if notification.is_read else 'mi-elevate' }}">
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold">
+                  {% if notification.type == 'success' %}
+                    <i class="fas fa-check-circle text-emerald-600"></i>
+                  {% elif notification.type == 'warning' %}
+                    <i class="fas fa-exclamation-triangle text-amber-600"></i>
+                  {% elif notification.type == 'error' %}
+                    <i class="fas fa-times-circle text-red-600"></i>
+                  {% else %}
+                    <i class="fas fa-info-circle text-blue-600"></i>
+                  {% endif %}
+                  {{ notification.title }}
+                </h3>
+                <small class="muted">{{ notification.created_at }}</small>
+              </div>
+              <p class="mt-2">{{ notification.message }}</p>
+              {% if not notification.is_read %}
+                <a class="btn btn-secondary mt-3" href="{{ url_for('mark_notification_read', notification_id=notification.id) }}">Mark as Read</a>
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-center muted italic">You're all caught up. No notifications right now.</p>
+        {% endif %}
+      </div>
+    </section>
+  </main>
+{% endblock %}

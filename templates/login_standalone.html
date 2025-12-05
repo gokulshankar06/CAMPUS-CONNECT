@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - CampusConnect</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='futuristic-violet.css') }}" rel="stylesheet">
+  <style>
+    /* Page-Specific Login Styles */
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Unique animated background for login */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 10% 20%, rgba(139, 44, 247, 0.3) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(0, 255, 255, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(255, 0, 255, 0.1) 0%, transparent 40%);
+      animation: float 20s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      33% { transform: translateY(-20px) scale(1.05); }
+      66% { transform: translateY(10px) scale(0.95); }
+    }
+
+    /* Header with glow effect */
+    .header {
+      background: rgba(10, 0, 21, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(139, 44, 247, 0.3);
+      padding: 1.25rem 2rem;
+      position: relative;
+      z-index: 100;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), 0 0 60px rgba(139, 44, 247, 0.1);
+    }
+
+    .header__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #fff;
+      text-decoration: none;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #00ffff, #8b2cf7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      transition: all 0.3s ease;
+    }
+
+    .brand:hover {
+      transform: scale(1.05);
+      text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+    }
+
+    .nav {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .nav a {
+      color: #e9d5ff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.5rem 1.25rem;
+      border-radius: 24px;
+      border: 1px solid rgba(139, 44, 247, 0.3);
+      background: rgba(139, 44, 247, 0.1);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 0.875rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav a::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.3), transparent);
+      transform: translate(-50%, -50%);
+      transition: width 0.5s ease, height 0.5s ease;
+    }
+
+    .nav a:hover::before {
+      width: 150%;
+      height: 150%;
+    }
+
+    .nav a:hover {
+      color: #00ffff;
+      border-color: #00ffff;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3);
+    }
+
+    /* Main Content Area */
+    .main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Login Card with Glassmorphism */
+    .login-card {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(29, 0, 82, 0.7);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(139, 44, 247, 0.3);
+      border-radius: 32px;
+      padding: 3rem;
+      box-shadow: 
+        0 25px 60px rgba(0, 0, 0, 0.4),
+        0 0 100px rgba(139, 44, 247, 0.2),
+        inset 0 0 30px rgba(139, 44, 247, 0.05);
+      animation: slideUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated border gradient */
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #00ffff, #8b2cf7, #ff00ff, #8b2cf7);
+      border-radius: 32px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+      animation: rotate 4s linear infinite;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .login-card:hover::before {
+      opacity: 0.6;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .title {
+      margin: 0 0 0.5rem;
+      font-size: 2.5rem;
+      font-weight: 800;
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #ffffff, #e9d5ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 40px rgba(139, 44, 247, 0.5);
+    }
+
+    .subtitle {
+      margin: 0 0 2rem;
+      color: #c084fc;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    /* Form Styling */
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      position: relative;
+    }
+
+    .form label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #e9d5ff;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+    }
+
+    .input {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      background: rgba(10, 0, 21, 0.5);
+      border: 1px solid rgba(139, 44, 247, 0.3);
+      border-radius: 16px;
+      color: #ffffff;
+      font-size: 1rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .input::placeholder {
+      color: rgba(192, 132, 252, 0.5);
+    }
+
+    .input:focus {
+      outline: none;
+      background: rgba(10, 0, 21, 0.7);
+      border-color: #00ffff;
+      box-shadow: 
+        0 0 0 3px rgba(0, 255, 255, 0.1),
+        0 0 30px rgba(0, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      transform: translateY(-2px);
+    }
+
+    /* Submit Button with Glow */
+    .btn-submit {
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, #6b00d4, #5200a3);
+      color: white;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border: 2px solid #8b2cf7;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      margin-top: 1rem;
+      box-shadow: 
+        0 4px 20px rgba(139, 44, 247, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    .btn-submit:hover::before {
+      width: 300%;
+      height: 300%;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #8b2cf7, #6b00d4);
+      border-color: #00ffff;
+      box-shadow: 
+        0 8px 30px rgba(139, 44, 247, 0.6),
+        0 0 60px rgba(139, 44, 247, 0.4);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-submit:active {
+      transform: translateY(-1px);
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(139, 44, 247, 0.5), transparent);
+      margin: 2rem 0;
+    }
+
+    /* Sign up link */
+    .signup-link {
+      text-align: center;
+      color: #c084fc;
+      font-size: 0.9rem;
+    }
+
+    .signup-link a {
+      color: #00ffff;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .signup-link a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #00ffff, #8b2cf7);
+      transition: width 0.3s ease;
+    }
+
+    .signup-link a:hover::after {
+      width: 100%;
+    }
+
+    .signup-link a:hover {
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    }
+
+    /* Alert Styles */
+    .alert {
+      padding: 1rem 1.25rem;
+      border-radius: 16px;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid;
+      backdrop-filter: blur(10px);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .alert-success {
+      background: rgba(57, 255, 20, 0.1);
+      border-color: #39ff14;
+      color: #39ff14;
+    }
+
+    .alert-danger {
+      background: rgba(255, 20, 147, 0.1);
+      border-color: #ff1493;
+      color: #ff1493;
+    }
+
+    .alert-warning {
+      background: rgba(255, 255, 0, 0.1);
+      border-color: #ffff00;
+      color: #ffff00;
+    }
+
+    .alert-info {
+      background: rgba(0, 255, 255, 0.1);
+      border-color: #00ffff;
+      color: #00ffff;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 520px) {
+      .login-card {
+        padding: 2rem;
+        border-radius: 24px;
+      }
+      .title {
+        font-size: 2rem;
+      }
+      .header {
+        padding: 1rem;
+      }
+      .brand {
+        font-size: 1.25rem;
+      }
+      .nav a {
+        padding: 0.4rem 1rem;
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header__inner">
+      <a class="brand" href="{{ url_for('index') }}">
+        <i class="fas fa-graduation-cap"></i>
+        CampusConnect
+      </a>
+      <nav class="nav">
+        <a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a>
+        <a href="{{ url_for('auth.signup') }}"><i class="fas fa-user-plus"></i> Sign Up</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="login-card" aria-labelledby="loginTitle">
+      <h1 id="loginTitle" class="title">Welcome Back</h1>
+      <p class="subtitle">Sign in to your CampusConnect account</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+              <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' if category == 'warning' else 'times-circle' }}"></i>
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" class="form" id="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" class="input" required placeholder="Enter your username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" class="input" required placeholder="Enter your password">
+        </div>
+        <button type="submit" class="btn-submit"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+      </form>
+
+      <div class="divider"></div>
+      <p class="signup-link">Don't have an account? <a href="{{ url_for('auth.signup') }}">Sign up here</a></p>
+    </section>
+  </main>
+</body>
+</html>

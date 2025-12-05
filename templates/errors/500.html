@@ -1,0 +1,29 @@
+{% extends '_base.html' %}
+
+{% block title %}500 · Server Error · CampusConnect{% endblock %}
+
+{% block content %}
+  <header class="header header--brand" role="banner">
+    <h1 class="header-title"><i class="fas fa-exclamation-triangle"></i> Internal Server Error</h1>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="{{ url_for('index') }}">Home</a>
+      <a href="{{ url_for('auth.login') }}">Login</a>
+      <a href="{{ url_for('auth.signup') }}">Sign Up</a>
+    </nav>
+  </header>
+
+  <main class="container" role="main">
+    <section class="card text-center">
+      <div class="card-header">
+        <h2 class="card-title">500 — Something went wrong</h2>
+      </div>
+      <div class="space-y-4">
+        <p class="text-slate-600">Our team has been notified. Please try again in a moment.</p>
+        <div class="flex items-center justify-center gap-3">
+          <a href="{{ url_for('index') }}" class="btn btn-primary"><i class="fas fa-home"></i> Go Home</a>
+          <a href="javascript:history.back()" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Go Back</a>
+        </div>
+      </div>
+    </section>
+  </main>
+{% endblock %}

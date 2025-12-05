@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card glass-card">
+                <div class="card-header bg-transparent border-0">
+                    <h1 class="mb-0"><i class="fas fa-envelope me-2"></i> Contact Us</h1>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>Get in Touch</h3>
+                            <p class="text-muted">
+                                Have questions or feedback? We'd love to hear from you! Fill out the form and our team 
+                                will get back to you as soon as possible.
+                            </p>
+                            
+                            <div class="mt-4">
+                                <h4><i class="fas fa-map-marker-alt text-primary me-2"></i> Our Office</h4>
+                                <p class="ms-4">
+                                    123 University Avenue<br>
+                                    Campus Town, CT 12345<br>
+                                    United States
+                                </p>
+                                
+                                <h4 class="mt-4"><i class="fas fa-phone text-primary me-2"></i> Phone</h4>
+                                <p class="ms-4">+1 (555) 123-4567</p>
+                                
+                                <h4 class="mt-4"><i class="fas fa-envelope text-primary me-2"></i> Email</h4>
+                                <p class="ms-4">support@campusconnect.edu</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <form>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Your Name</label>
+                                    <input type="text" class="form-control" id="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subject" class="form-label">Subject</label>
+                                    <input type="text" class="form-control" id="subject" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="message" class="form-label">Message</label>
+                                    <textarea class="form-control" id="message" rows="5" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Send Message
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    // Add any JavaScript for form validation or submission here
+    document.addEventListener('DOMContentLoaded', function() {
+        const contactForm = document.querySelector('form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                // Add form submission logic here
+                alert('Thank you for your message! We will get back to you soon.');
+                this.reset();
+            });
+        }
+    });
+</script>
+{% endblock %}

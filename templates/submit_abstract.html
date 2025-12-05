@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Abstract - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="header-section mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="dashboard-title">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Submit Abstract
+                        </h1>
+                        <p class="text-muted">{{ event.title }} - {{ event.event_type|title }}</p>
+                    </div>
+                    <a href="{{ url_for('events.event_details', event_id=event.id) }}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Event
+                    </a>
+                </div>
+            </div>
+
+            <!-- Event Requirements -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Abstract Requirements</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>Word Count:</strong><br>
+                            {{ event.abstract_min_words or 150 }} - {{ event.abstract_max_words or 500 }} words
+                        </div>
+                        <div class="col-md-3">
+                            <strong>File Types:</strong><br>
+                            {{ event.allowed_file_types or 'PDF, DOCX, TXT' }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Max File Size:</strong><br>
+                            {{ event.max_file_size_mb or 5 }} MB
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Deadline:</strong><br>
+                            {% if event.abstract_deadline %}
+                                {{ event.abstract_deadline|format_datetime }}
+                            {% else %}
+                                Same as registration deadline
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Information -->
+            {% if team %}
+            <div class="alert alert-info">
+                <i class="fas fa-users me-2"></i>
+                <strong>Team Submission:</strong> This abstract will be submitted on behalf of team "{{ team.name }}"
+            </div>
+            {% endif %}
+
+            <!-- Existing Submission Alert -->
+            {% if existing_submission %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Existing Submission Found:</strong> 
+                You have an existing {{ existing_submission.status }} abstract. 
+                {% if existing_submission.status == 'draft' %}
+                    You can continue editing until you finalize the submission.
+                {% elif existing_submission.status == 'submitted' %}
+                    Your abstract is under review. You cannot make changes at this time.
+                {% elif existing_submission.status == 'revision_required' %}
+                    Revision is required. Please update your abstract based on the feedback.
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Abstract Submission Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        {% if existing_submission %}Update{% else %}Submit{% endif %} Abstract
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" id="abstractForm">
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Abstract Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   value="{{ existing_submission.title if existing_submission else '' }}" 
+                                   required maxlength="200">
+                            <div class="form-text">A clear, descriptive title for your abstract</div>
+                        </div>
+
+                        <!-- Abstract Text -->
+                        <div class="mb-3">
+                            <label for="abstract_text" class="form-label">Abstract Text <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="abstract_text" name="abstract_text" 
+                                      rows="12" required>{{ existing_submission.abstract_text if existing_submission else '' }}</textarea>
+                            <div class="d-flex justify-content-between">
+                                <div class="form-text">
+                                    Word count: {{ event.abstract_min_words or 150 }} - {{ event.abstract_max_words or 500 }} words
+                                </div>
+                                <div id="wordCount" class="form-text">
+                                    <span id="currentWords">0</span> words
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File Upload -->
+                        <div class="mb-3">
+                            <label for="abstract_file" class="form-label">Upload File (Optional)</label>
+                            <input type="file" class="form-control" id="abstract_file" name="abstract_file" 
+                                   accept=".pdf,.docx,.txt">
+                            <div class="form-text">
+                                Upload a formatted version of your abstract ({{ event.allowed_file_types or 'PDF, DOCX, TXT' }}, max {{ event.max_file_size_mb or 5 }}MB)
+                            </div>
+                            {% if existing_submission and existing_submission.file_name %}
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    Current file: {{ existing_submission.file_name }}
+                                    ({{ (existing_submission.file_size / 1024 / 1024)|round(2) }} MB)
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2">
+                            {% if not existing_submission or existing_submission.status in ['draft', 'revision_required'] %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>
+                                Save as Draft
+                            </button>
+                            {% endif %}
+                            
+                            {% if existing_submission and existing_submission.status == 'draft' %}
+                            <button type="button" class="btn btn-success" onclick="finalizeSubmission()">
+                                <i class="fas fa-check me-1"></i>
+                                Finalize Submission
+                            </button>
+                            {% endif %}
+                            
+                            <a href="{{ url_for('events.event_details', event_id=event.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Existing Submission Details -->
+            {% if existing_submission %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info me-2"></i>Submission Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>Status:</strong><br>
+                            <span class="badge bg-{{ 'success' if existing_submission.status == 'approved' 
+                                                    else 'warning' if existing_submission.status == 'draft' 
+                                                    else 'info' if existing_submission.status == 'submitted'
+                                                    else 'danger' }}">
+                                {{ existing_submission.status|replace('_', ' ')|title }}
+                            </span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Word Count:</strong><br>
+                            {{ existing_submission.word_count }} words
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Version:</strong><br>
+                            {{ existing_submission.version }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Last Updated:</strong><br>
+                            {{ existing_submission.updated_at|format_datetime }}
+                        </div>
+                    </div>
+                    
+                    {% if existing_submission.feedback %}
+                    <hr>
+                    <div>
+                        <strong>Feedback:</strong>
+                        <div class="mt-2 p-3 bg-light rounded">
+                            {{ existing_submission.feedback }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Finalize Submission Modal -->
+{% if existing_submission and existing_submission.status == 'draft' %}
+<div class="modal fade" id="finalizeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Finalize Submission</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Are you sure you want to finalize this submission?</strong></p>
+                <p>Once finalized:</p>
+                <ul>
+                    <li>You will not be able to make any further changes</li>
+                    <li>The abstract will be sent for review</li>
+                    <li>You will receive notifications about the review status</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('abstracts.finalize_submission', submission_id=existing_submission.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-1"></i>
+                        Yes, Finalize
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+// Word counter
+function updateWordCount() {
+    const text = document.getElementById('abstract_text').value;
+    const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+    const minWords = {{ event.abstract_min_words or 150 }};
+    const maxWords = {{ event.abstract_max_words or 500 }};
+    
+    document.getElementById('currentWords').textContent = words;
+    
+    const wordCountElement = document.getElementById('wordCount');
+    if (words < minWords) {
+        wordCountElement.className = 'form-text text-danger';
+    } else if (words > maxWords) {
+        wordCountElement.className = 'form-text text-danger';
+    } else {
+        wordCountElement.className = 'form-text text-success';
+    }
+}
+
+// Initialize word count
+document.addEventListener('DOMContentLoaded', function() {
+    updateWordCount();
+    document.getElementById('abstract_text').addEventListener('input', updateWordCount);
+});
+
+// Finalize submission with fallback
+function finalizeSubmission() {
+    // Check if Bootstrap is available
+    if (typeof bootstrap !== 'undefined') {
+        try {
+            const modal = new bootstrap.Modal(document.getElementById('finalizeModal'));
+            modal.show();
+            return;
+        } catch (e) {
+            console.error('Bootstrap modal error:', e);
+        }
+    }
+    
+    // Fallback to native confirmation dialog
+    const confirmMessage = `Are you sure you want to finalize this submission?\n\nOnce finalized:\n• You will not be able to make any further changes\n• The abstract will be sent for review\n• Plagiarism check will be performed`;
+    
+    if (confirm(confirmMessage)) {
+        // Find and submit the finalize form
+        const form = document.querySelector('form[action*="finalize"]');
+        if (form) {
+            form.submit();
+        } else {
+            // Create a form if it doesn't exist in the modal
+            const finalizeForm = document.createElement('form');
+            finalizeForm.method = 'POST';
+            finalizeForm.action = '{{ url_for("abstracts.finalize_submission", submission_id=existing_submission.id) if existing_submission else "#" }}';
+            document.body.appendChild(finalizeForm);
+            finalizeForm.submit();
+        }
+    }
+}
+
+// Form validation
+document.getElementById('abstractForm').addEventListener('submit', function(e) {
+    const text = document.getElementById('abstract_text').value;
+    const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+    const minWords = {{ event.abstract_min_words or 150 }};
+    const maxWords = {{ event.abstract_max_words or 500 }};
+    
+    if (words < minWords || words > maxWords) {
+        e.preventDefault();
+        alert(`Abstract must be between ${minWords} and ${maxWords} words. Current: ${words} words.`);
+        return false;
+    }
+});
+</script>
+
+<!-- Bootstrap JS for Modal functionality -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

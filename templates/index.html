@@ -1,0 +1,458 @@
+{% extends '_base.html' %}
+
+{% block title %}CampusConnect - Academic Excellence Platform{% endblock %}
+
+{% block head_extra %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"></noscript>
+    <style>
+        :root {
+            --header-height: 80px;
+            --footer-height: 80px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Professional Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-800) 60%, var(--primary-900) 100%);
+            color: white;
+            height: var(--header-height);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 50%, var(--primary-900) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: var(--header-height);
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .hero-content {
+            text-align: center;
+            color: white;
+            z-index: 10;
+            max-width: 800px;
+            padding: var(--space-8);
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: var(--space-6);
+            background: linear-gradient(135deg, #ffffff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            line-height: 1.1;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: var(--space-8);
+            color: var(--primary-100);
+            font-weight: 400;
+            line-height: 1.6;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: var(--space-4);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: var(--space-12);
+        }
+        
+        .hero-btn {
+            padding: var(--space-4) var(--space-8);
+            font-size: 1.125rem;
+            font-weight: 600;
+            border-radius: var(--radius-xl);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-width: 160px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+        }
+        
+        .hero-btn-primary {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .hero-btn-primary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .hero-btn-secondary {
+            background: white;
+            color: var(--primary-700);
+            border: 2px solid white;
+        }
+        
+        .hero-btn-secondary:hover {
+            background: var(--primary-50);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .features {
+            padding: var(--space-20) var(--space-8);
+            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+        }
+        
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .features-header {
+            text-align: center;
+            margin-bottom: var(--space-16);
+        }
+        
+        .features-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: var(--space-4);
+        }
+        
+        .features-subtitle {
+            font-size: 1.25rem;
+            color: var(--gray-600);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-8);
+            margin-bottom: var(--space-16);
+        }
+        
+        .feature-card {
+            background: white;
+            padding: var(--space-8);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--space-6);
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: var(--space-3);
+        }
+        
+        .feature-description {
+            color: var(--gray-600);
+            line-height: 1.6;
+        }
+        
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
+            padding: var(--space-20) var(--space-8);
+            text-align: center;
+            color: white;
+        }
+        
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: var(--space-4);
+        }
+        
+        .cta-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: var(--space-8);
+            color: var(--primary-100);
+        }
+        
+        /* Footer */
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 2rem 0;
+            border-top: 1px solid #374151;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-link {
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #374151;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        /* Index-only motion enhancements (structure-safe) */
+        .hero { background-size: 200% 200%; animation: hero-pan 18s ease infinite; }
+        @keyframes hero-pan {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        .hero::after {
+          content: '';
+          position: absolute;
+          width: 700px; height: 700px;
+          background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12), rgba(255,255,255,0) 60%);
+          filter: blur(30px);
+          top: -200px; right: -200px;
+          animation: blob 22s ease-in-out infinite;
+          pointer-events: none;
+        }
+        @keyframes blob {
+          0% { transform: translate(0,0) scale(1); }
+          33% { transform: translate(-60px, 40px) scale(1.05); }
+          66% { transform: translate(40px, -40px) scale(0.97); }
+          100% { transform: translate(0,0) scale(1); }
+        }
+
+        .hero-content { animation: fadeUp 700ms cubic-bezier(.21,.61,.35,1) both; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .hero h1 { animation: titlePop 800ms cubic-bezier(.2,.7,.3,1) .05s both; }
+        @keyframes titlePop { 0% { transform: translateY(12px) scale(.98); opacity: 0; } 100% { transform: none; opacity: 1; } }
+        .hero-subtitle { animation: fadeUp 900ms cubic-bezier(.21,.61,.35,1) .12s both; }
+        .hero-buttons { animation: fadeUp 1000ms cubic-bezier(.21,.61,.35,1) .18s both; }
+
+        .nav-link { position: relative; }
+        .nav-link::after {
+          content: '';
+          position: absolute; left: 1rem; right: 1rem; bottom: .35rem; height: 2px;
+          background: rgba(255,255,255,.35);
+          transform: scaleX(0); transform-origin: left; transition: transform .25s ease;
+        }
+        .nav-link:hover::after { transform: scaleX(1); }
+
+        .hero-btn { transform: translateZ(0); }
+        .hero-btn::after {
+          content: '';
+          position: absolute; inset: 0;
+          background: linear-gradient(120deg, rgba(255,255,255,.0), rgba(255,255,255,.18), rgba(255,255,255,.0));
+          background-size: 250% 100%; background-position: 100% 0; transition: background-position .6s ease; pointer-events: none;
+        }
+        .hero-btn:hover::after { background-position: 0 0; }
+        .hero-btn:hover { transform: translateY(-3px); }
+
+        .features .card { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; border: 1px solid var(--gray-200); background: linear-gradient(180deg, #fff, #fafafa); }
+        .features .card:hover { transform: translateY(-6px); box-shadow: var(--shadow-xl); border-color: var(--primary-200); }
+        .features .card .card-header { border-bottom-color: var(--gray-200); }
+        .feature-icon { animation: iconFloat 6s ease-in-out infinite; }
+        @keyframes iconFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+        .features-title { background: linear-gradient(135deg, var(--primary-700), var(--primary-500)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent; }
+        .cta-section { background-size: 200% 200%; animation: cta-pan 16s ease infinite; position: relative; overflow: hidden; }
+        .cta-section::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle at 20% -10%, rgba(255,255,255,.2), transparent 50%), radial-gradient(circle at 80% 120%, rgba(255,255,255,.12), transparent 50%); pointer-events: none; }
+        @keyframes cta-pan { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        @media (max-width: 768px) {
+          .header-container { padding: 0 1rem; }
+          .nav-menu { gap: 1rem; }
+          .nav-link { padding: 0.5rem; font-size: 0.875rem; }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+  <header class="header" role="banner">
+    <div class="header-container">
+      <a href="{{ url_for('index') }}" class="logo">
+        <i class="fas fa-graduation-cap"></i>
+        CampusConnect
+      </a>
+      <nav class="nav-menu" role="navigation" aria-label="Primary">
+        <a href="{{ url_for('auth.login') }}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
+        <a href="{{ url_for('auth.signup') }}" class="nav-link"><i class="fas fa-user-plus"></i> Sign Up</a>
+      </nav>
+    </div>
+  </header>
+
+  <main role="main">
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Achieve Academic Excellence</h1>
+        <p class="hero-subtitle">Assignments, analytics, and AI assistance in a modern platform for students and faculty.</p>
+        <div class="hero-buttons">
+          <a href="{{ url_for('auth.signup') }}" class="hero-btn hero-btn-secondary"><i class="fas fa-rocket"></i> Get Started</a>
+          <a href="{{ url_for('auth.login') }}" class="hero-btn hero-btn-primary"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding:2rem 1rem;">
+      <h3 class="text-2xl font-bold text-center mb-6">Everything You Need for Academic Success</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;max-width:1200px;margin:0 auto;">
+        <div class="card text-center">
+          <div class="card-header"><h4 class="card-title">Plagiarism Detection</h4></div>
+          <p class="card-description">AI-powered detection with real-time analysis and detailed reports.</p>
+        </div>
+        <div class="card text-center">
+          <div class="card-header"><h4 class="card-title">AI Assistant</h4></div>
+          <p class="card-description">Instant help with academic questions through our intelligent chatbot.</p>
+        </div>
+        <div class="card text-center">
+          <div class="card-header"><h4 class="card-title">Assignment Management</h4></div>
+          <p class="card-description">Create, submit, and manage assignments with ease and efficiency.</p>
+        </div>
+        <div class="card text-center">
+          <div class="card-header"><h4 class="card-title">Progress Tracking</h4></div>
+          <p class="card-description">Monitor progress with detailed analytics for students and faculty.</p>
+        </div>
+        <div class="card text-center">
+          <div class="card-header"><h4 class="card-title">Collaboration</h4></div>
+          <p class="card-description">Better communication with integrated collaboration tools.</p>
+        </div>
+        <div class="card text-center">
+          <div class="card-header"><h4 class="card-title">Secure Platform</h4></div>
+          <p class="card-description">Enterprise-grade security and privacy for your data.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card text-center" style="margin:1.5rem auto; max-width:1200px;">
+      <h3 class="text-2xl font-bold mb-2">Ready to Transform Your Academic Experience?</h3>
+      <p class="mb-6">Join thousands of students and faculty already using CampusConnect.</p>
+      <div class="flex items-center justify-center gap-4">

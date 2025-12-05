@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ team.name }} · CampusConnect</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='futuristic-violet.css') }}" rel="stylesheet">
+  <style>
+    /* Page-Specific Team Details Styles */
+    body {
+      min-height: 100vh;
+      position: relative;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Animated background pattern */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(0, 255, 255, 0.2) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(139, 44, 247, 0.15) 0%, transparent 45%);
+      animation: team-pulse 25s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes team-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.02); }
+    }
+
+    .page-header {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(139, 44, 247, 0.15));
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+      padding: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), 0 0 60px rgba(0, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    .page-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+      text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .page-header h1 i {
+      color: #00ffff;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .nav a {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(139, 44, 247, 0.2));
+      border: 1px solid rgba(0, 255, 255, 0.4);
+      border-radius: 10px;
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+
+    .nav a:hover {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(139, 44, 247, 0.3));
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3);
+    }
+
+    .content-wrapper {
+      position: relative;
+      z-index: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .team-hero {
+      background: linear-gradient(145deg, rgba(0, 255, 255, 0.05), rgba(29, 0, 82, 0.85));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 24px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .team-title {
+      color: #00ffff;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+
+    .event-link {
+      color: #39ff14;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .event-link:hover {
+      text-decoration: underline;
+    }
+
+    .team-description {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .team-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .meta-card {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(139, 44, 247, 0.1));
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .meta-card i {
+      color: #00ffff;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .meta-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .meta-value {
+      color: #00ffff;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .team-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .status-open {
+      background: linear-gradient(135deg, #39ff14, #00ff88);
+      color: #0a0015;
+    }
+
+    .status-closed {
+      background: linear-gradient(135deg, #ff1493, #ff0080);
+      color: #fff;
+    }
+
+    .membership-section {
+      background: linear-gradient(145deg, rgba(0, 255, 255, 0.05), rgba(29, 0, 82, 0.85));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .membership-status {
+      text-align: center;
+      padding: 1rem;
+      border-radius: 15px;
+      margin-bottom: 1rem;
+    }
+
+    .membership-status.member {
+      background: linear-gradient(135deg, rgba(57, 255, 20, 0.2), rgba(0, 255, 136, 0.1));
+      border: 1px solid rgba(57, 255, 20, 0.4);
+      color: #39ff14;
+    }
+
+    .membership-status.pending {
+      background: linear-gradient(135deg, rgba(255, 191, 0, 0.2), rgba(255, 140, 0, 0.1));
+      border: 1px solid rgba(255, 191, 0, 0.4);
+      color: #ffbf00;
+    }
+
+    .membership-status.not-member {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 191, 255, 0.1));
+      border: 1px solid rgba(0, 255, 255, 0.4);
+      color: #00ffff;
+    }
+
+    .membership-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #39ff14, #00ff88);
+      color: #0a0015;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(57, 255, 20, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #00ffff, #00bfff);
+      color: #0a0015;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 255, 255, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ff1493, #ff0080);
+      color: #fff;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 20, 147, 0.4);
+    }
+
+    .members-section {
+      background: linear-gradient(145deg, rgba(0, 255, 255, 0.05), rgba(29, 0, 82, 0.85));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 2rem;
+    }
+
+    .members-section h2 {
+      color: #00ffff;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .members-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .member-card {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(139, 44, 247, 0.1));
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .member-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 255, 255, 0.2);
+    }
+
+    .member-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .member-avatar {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #00ffff, #39ff14);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0a0015;
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .member-info h4 {
+      color: #00ffff;
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .member-role {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    .member-details {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+    }
+
+    .no-members {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      padding: 2rem;
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      .page-header h1 {
+        font-size: 2rem;
+      }
+
+      .team-meta-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .members-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .membership-actions {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header" role="banner">
+    <h1><i class="fas fa-users"></i> {{ team.name }}</h1>
+    <nav class="nav" role="navigation" aria-label="Team Navigation">
+      <a href="{{ url_for('events.event_details', event_id=team.event_id) }}"><i class="fas fa-arrow-left"></i> Back to Event</a>
+      <a href="{{ url_for('events.browse_events') }}"><i class="fas fa-calendar-alt"></i> Browse Events</a>
+      <a href="{{ url_for('main.dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+  </header>
+
+  <main class="content-wrapper">
+    <!-- Team Hero Section -->
+    <div class="team-hero">
+      <h2 class="team-title">{{ team.name }}</h2>
+      <p class="team-description">{{ team.description or 'No description available' }}</p>
+
+      {% if is_member %}
+      <form id="teamFileUploadForm" method="POST" action="{{ url_for('teams.upload_team_file', team_id=team.id) }}" enctype="multipart/form-data" style="display: none;">
+        <input type="file" id="teamFileInput" name="file" onchange="document.getElementById('teamFileUploadForm').submit();">
+      </form>
+      <div class="team-status {% if team.is_open %}status-open{% else %}status-closed{% endif %}" onclick="var input = document.getElementById('teamFileInput'); if (input) { input.click(); }" style="cursor: pointer;">
+        <i class="fas fa-{% if team.is_open %}upload{% else %}lock{% endif %}"></i>
+        {% if team.is_open %}
+          Open · Upload Files
+        {% else %}
+          Closed
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="team-status {% if team.is_open %}status-open{% else %}status-closed{% endif %}">
+        <i class="fas fa-{% if team.is_open %}unlock{% else %}lock{% endif %}"></i>
+        {{ 'Open' if team.is_open else 'Closed' }}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Team Meta Information -->
+    <div class="team-meta-grid">
+      <div class="meta-card">
+        <i class="fas fa-calendar-alt"></i>
+        <div class="meta-label">Event</div>
+        <div class="meta-value">
+          <a href="{{ url_for('events.event_details', event_id=team.event_id) }}" class="event-link">
+            {{ team.event_title }}
+          </a>
+        </div>
+      </div>
+
+      <div class="meta-card">
+        <i class="fas fa-user"></i>
+        <div class="meta-label">Team Leader</div>
+        <div class="meta-value">{{ team.leader_name }}</div>
+      </div>
+
+      <div class="meta-card">
+        <i class="fas fa-users"></i>
+        <div class="meta-label">Members</div>
+        <div class="meta-value">{{ members|length }} / {{ team.max_members }}</div>
+      </div>
+
+      <div class="meta-card">
+        <i class="fas fa-clock"></i>
+        <div class="meta-label">Created</div>
+        <div class="meta-value">{{ team.created_at|format_datetime }}</div>
+      </div>
+    </div>
+
+    <!-- Membership Section -->
+    {% if current_user.role == 'student' %}
+      <div class="membership-section">
+        {% if is_member %}
+          <div class="membership-status member">
+            <i class="fas fa-check-circle"></i>
+            <h3>You're a Member!</h3>
+            <p>Role: {{ user_role|title or 'Member' }}</p>
+          </div>
+        {% elif is_member == False and members|length < team.max_members %}
+          <div class="membership-status pending">
+            <i class="fas fa-clock"></i>
+            <h3>Join Request Pending</h3>
+            <p>Your request to join this team is being reviewed by the team leader.</p>
+          </div>
+        {% else %}
+          <div class="membership-status not-member">
+            <i class="fas fa-info-circle"></i>
+            <h3>Not a Member</h3>
+            <p>Join this team to collaborate with other members on the event.</p>
+          </div>
+
+          <div class="membership-actions">
+            {% if team.is_open and members|length < team.max_members %}
+              <form method="POST" action="{{ url_for('events.join_team', team_id=team.id) }}" style="display: inline;">
+                <button type="submit" class="btn-primary">
+                  <i class="fas fa-plus"></i> Request to Join
+                </button>
+              </form>
+            {% else %}
+              <button class="btn-secondary" disabled>
+                <i class="fas fa-times"></i> Team Full or Closed
+              </button>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <!-- Members Section -->
+    <div class="members-section">
+      <h2><i class="fas fa-users"></i> Team Members</h2>
+
+      {% if members %}
+        <div class="members-grid">
+          {% for member in members %}
+            <div class="member-card">
+              <div class="member-header">
+                <div class="member-avatar">
+                  {{ member.username[0]|upper }}
+                </div>
+                <div class="member-info">
+                  <h4>{{ member.full_name or member.username }}</h4>
+                  <div class="member-role">
+                    {% if member.id == team.leader_id %}
+                      <i class="fas fa-crown"></i> Team Leader
+                    {% else %}
+                      <i class="fas fa-user"></i> Member
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="member-details">
+                <p><i class="fas fa-envelope"></i> {{ member.email }}</p>
+                {% if member.department %}
+                  <p><i class="fas fa-building"></i> {{ member.department }}</p>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="no-members">
+          <i class="fas fa-users-slash"></i>
+          <p>No members have joined this team yet.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Team Files Section -->
+    <div class="members-section" style="margin-top: 2rem;">
+      <h2><i class="fas fa-folder-open"></i> Team Files</h2>
+
+      {% if team_files and team_files|length > 0 %}
+        <div class="members-grid">
+          {% for f in team_files %}
+          <div class="member-card">
+            <div class="member-header" style="justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div class="member-avatar" style="width: 40px; height: 40px; font-size: 0.9rem;">
+                  <i class="fas fa-file"></i>
+                </div>
+                <div class="member-info">
+                  <h4 style="margin-bottom: 0.25rem;">{{ f.file_name }}</h4>
+                  <div class="member-role">
+                    Uploaded by {{ f.uploader_name or f.uploader_username }}
+                  </div>
+                </div>
+              </div>
+              <a href="{{ url_for('teams.download_team_file', team_id=team.id, file_id=f.id) }}" class="btn-primary" style="padding: 0.4rem 0.9rem; font-size: 0.85rem;">
+                <i class="fas fa-download"></i> Download
+              </a>
+            </div>
+            <div class="member-details">
+              {% if f.file_size %}
+              <p><i class="fas fa-weight-hanging"></i>
+                {{ (f.file_size / 1024)|round(1) }} KB
+              </p>
+              {% endif %}
+              {% if f.uploaded_at %}
+              <p><i class="fas fa-clock"></i>
+                {{ f.uploaded_at|format_datetime }}
+              </p>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="no-members">
+          <i class="fas fa-folder-open"></i>
+          <p>No files have been uploaded for this team yet.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Pending Join Requests Section (Team Leader Only) -->
+    {% if is_leader %}
+    <div class="section-card" style="margin-top: 2rem; background: linear-gradient(145deg, rgba(255, 20, 147, 0.05), rgba(139, 44, 247, 0.05)); backdrop-filter: blur(20px); border: 1px solid rgba(255, 20, 147, 0.2); border-radius: 20px; padding: 2rem;">
+      <h2 style="color: #ff00ff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fas fa-user-clock"></i> Pending Join Requests
+        {% if pending_requests|length > 0 %}
+          <span style="background: linear-gradient(135deg, #ff1493, #ff0080); color: #fff; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.8rem; margin-left: 0.5rem;">
+            {{ pending_requests|length }}
+          </span>
+        {% endif %}
+      </h2>
+      
+      {% if pending_requests|length > 0 %}
+      <div class="requests-list" style="display: grid; gap: 1rem;">
+        {% for request in pending_requests %}
+        <div class="request-item" style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.05), rgba(255, 20, 147, 0.05)); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 15px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+          <div class="user-info">
+            <h4 style="color: #fff; margin: 0; font-size: 1.1rem;">
+              <i class="fas fa-user" style="color: #00ffff; margin-right: 0.5rem;"></i>
+              {{ request.full_name }}
+            </h4>
+            <p style="color: rgba(255, 255, 255, 0.7); margin: 0.25rem 0; font-size: 0.95rem;">
+              @{{ request.username }}
+            </p>
+            <p style="color: rgba(255, 255, 255, 0.6); margin: 0; font-size: 0.9rem;">
+              <i class="fas fa-envelope" style="margin-right: 0.3rem;"></i>
+              {{ request.email }}
+            </p>
+          </div>
+          
+          <div class="action-buttons" style="display: flex; gap: 0.75rem;">
+            <form method="POST" action="{{ url_for('events.accept_team_request', team_id=team.id, user_id=request.user_id) }}" style="margin: 0;">
+              <button type="submit" style="background: linear-gradient(135deg, #39ff14, #00ff00); color: #0a0015; padding: 0.75rem 1.25rem; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;" 
+                      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 20px rgba(57, 255, 20, 0.4)';" 
+                      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <i class="fas fa-check"></i> Accept
+              </button>
+            </form>
+            
+            <form method="POST" action="{{ url_for('events.reject_team_request', team_id=team.id, user_id=request.user_id) }}" style="margin: 0;">
+              <button type="submit" style="background: linear-gradient(135deg, #ff1493, #ff0080); color: #fff; padding: 0.75rem 1.25rem; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;" 
+                      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 20px rgba(255, 20, 147, 0.4)';" 
+                      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <i class="fas fa-times"></i> Reject
+              </button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="text-align: center; padding: 2rem;">
+        <i class="fas fa-inbox" style="font-size: 3rem; color: rgba(255, 255, 255, 0.3); margin-bottom: 1rem;"></i>
+        <p style="color: rgba(255, 255, 255, 0.6); margin: 0;">No pending join requests at the moment</p>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+  </main>
+</body>
+</html>

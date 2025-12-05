@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Manager Dashboard · CampusConnect</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='futuristic-violet.css') }}" rel="stylesheet">
+  <style>
+    /* Page-Specific Event Manager Dashboard Styles */
+    body {
+      min-height: 100vh;
+      position: relative;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Unique hexagonal pattern for event manager dashboard */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        radial-gradient(circle at 20% 50%, rgba(255, 0, 255, 0.2) 0%, transparent 40%),
+        radial-gradient(circle at 80% 30%, rgba(255, 20, 147, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(139, 44, 247, 0.15) 0%, transparent 50%),
+        linear-gradient(45deg, transparent 48%, rgba(255, 0, 255, 0.02) 49%, rgba(255, 0, 255, 0.02) 51%, transparent 52%);
+      background-size: cover, cover, cover, 30px 30px;
+      animation: hex-shift 25s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes hex-shift {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      33% { transform: scale(1.1) rotate(1deg); }
+      66% { transform: scale(0.95) rotate(-1deg); }
+    }
+
+    /* Enhanced Header with Magenta Theme for Event Manager */
+    .dashboard-header {
+      background: linear-gradient(135deg, rgba(255, 0, 255, 0.15), rgba(255, 20, 147, 0.2));
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 0, 255, 0.3);
+      padding: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), 0 0 80px rgba(255, 0, 255, 0.1);
+      text-align: center;
+    }
+    
+    .dashboard-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+      text-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .dashboard-header h1 i {
+      color: #ff00ff;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .nav a {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(255, 20, 147, 0.2));
+      border: 1px solid rgba(255, 0, 255, 0.4);
+      border-radius: 10px;
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+
+    .nav a:hover {
+      background: linear-gradient(135deg, rgba(255, 0, 255, 0.3), rgba(255, 20, 147, 0.3));
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(255, 0, 255, 0.3);
+    }
+
+    .dashboard-content {
+      position: relative;
+      z-index: 1;
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: linear-gradient(145deg, rgba(255, 0, 255, 0.05), rgba(29, 0, 82, 0.85));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 0, 255, 0.2);
+      border-radius: 24px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      animation: float-card 6s ease-in-out infinite;
+    }
+
+    .stat-card:nth-child(odd) {
+      animation-delay: 0.5s;
+    }
+
+    @keyframes float-card {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(255, 0, 255, 0.3);
+    }
+
+    .stat-card i {
+      font-size: 2.5rem;
+      color: #ff00ff;
+      margin-bottom: 1rem;
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, #ff00ff, #00ffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .recent-events {
+      background: linear-gradient(145deg, rgba(255, 0, 255, 0.05), rgba(29, 0, 82, 0.85));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 0, 255, 0.2);
+      border-radius: 24px;
+      padding: 2rem;
+    }
+
+    .recent-events h2 {
+      color: #ff00ff;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .event-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .event-item {
+      background: linear-gradient(145deg, rgba(255, 0, 255, 0.1), rgba(139, 44, 247, 0.1));
+      border: 1px solid rgba(255, 0, 255, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .event-item:hover {
+      transform: translateX(5px);
+      border-color: rgba(255, 0, 255, 0.5);
+      box-shadow: 0 5px 20px rgba(255, 0, 255, 0.2);
+    }
+
+    .event-title {
+      color: #00ffff;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    .event-meta {
+      display: flex;
+      gap: 1rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .event-badge {
+      background: linear-gradient(135deg, #ff00ff, #8b2cf7);
+      color: #fff;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      display: inline-block;
+      font-weight: 500;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #39ff14, #00ff88);
+      color: #0a0015;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(57, 255, 20, 0.4);
+    }
+
+    .logout-btn {
+      background: linear-gradient(135deg, #ff1493, #ff0080);
+      color: #fff;
+    }
+
+    .logout-btn:hover {
+      box-shadow: 0 10px 30px rgba(255, 20, 147, 0.4);
+    }
+
+    .welcome-message {
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .no-events {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      padding: 2rem;
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-header h1 {
+        font-size: 2rem;
+      }
+      
+      .stat-card {
+        padding: 1.5rem;
+      }
+      
+      .stat-number {
+        font-size: 2rem;
+      }
+      
+      .nav {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="dashboard-header" role="banner">
+    <h1><i class="fas fa-calendar-alt"></i> Event Manager Dashboard</h1>
+    <p class="welcome-message">Welcome back, {{ user.full_name or user.username }}! Manage your events and track registrations.</p>
+    <nav class="nav" role="navigation" aria-label="Event Manager Navigation">
+      <a href="{{ url_for('event_manager.events') }}"><i class="fas fa-list"></i> My Events</a>
+      <a href="{{ url_for('event_manager.create_event') }}"><i class="fas fa-plus"></i> Create Event</a>
+      <a href="{{ url_for('event_manager.analytics') }}"><i class="fas fa-chart-bar"></i> Analytics</a>
+      <a href="{{ url_for('auth.logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+  </header>
+
+  <main class="dashboard-content">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <i class="fas fa-calendar-plus"></i>
+        <div class="stat-number">{{ total_events }}</div>
+        <div class="stat-label">Total Events</div>
+      </div>
+      
+      <div class="stat-card">
+        <i class="fas fa-calendar-check"></i>
+        <div class="stat-number">{{ active_events }}</div>
+        <div class="stat-label">Active Events</div>
+      </div>
+      
+      <div class="stat-card">
+        <i class="fas fa-users"></i>
+        <div class="stat-number">{{ total_registrations }}</div>
+        <div class="stat-label">Total Registrations</div>
+      </div>
+      
+      <div class="stat-card">
+        <i class="fas fa-clock"></i>
+        <div class="stat-number">{{ pending_approvals }}</div>
+        <div class="stat-label">Pending Approvals</div>
+      </div>
+    </div>
+
+    <div class="recent-events">
+      <h2><i class="fas fa-clock"></i> Recent Events</h2>
+      {% if recent_events %}
+        <div class="event-list">
+          {% for event in recent_events %}
+            <div class="event-item">
+              <div class="event-title">{{ event.title }}</div>
+              <div class="event-meta">
+                <span class="event-badge">{{ event.event_type|title }}</span>
+                <span><i class="fas fa-calendar"></i> {{ event.start_date|format_datetime }}</span>
+                <span><i class="fas fa-map-marker-alt"></i> {{ event.venue or 'Online' }}</span>
+                <span class="event-badge">{{ event.status|title }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="no-events">
+          <i class="fas fa-calendar-times"></i>
+          <p>No events created yet. Start by creating your first event!</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="action-buttons">
+      <a href="{{ url_for('event_manager.create_event') }}" class="btn-primary">
+        <i class="fas fa-plus"></i> Create New Event
+      </a>
+      <a href="{{ url_for('event_manager.events') }}" class="btn-primary">
+        <i class="fas fa-list"></i> View All Events
+      </a>
+    </div>
+  </main>
+</body>
+</html>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='futuristic-violet.css') }}" rel="stylesheet">
+  <style>
+    /* Page-Specific Faculty Dashboard Styles */
+    body {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Unique hexagonal pattern for faculty dashboard */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        radial-gradient(circle at 20% 50%, rgba(255, 0, 255, 0.2) 0%, transparent 40%),
+        radial-gradient(circle at 80% 30%, rgba(255, 20, 147, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(139, 44, 247, 0.15) 0%, transparent 50%),
+        linear-gradient(45deg, transparent 48%, rgba(255, 0, 255, 0.02) 49%, rgba(255, 0, 255, 0.02) 51%, transparent 52%);
+      background-size: cover, cover, cover, 30px 30px;
+      animation: hex-shift 25s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes hex-shift {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      33% { transform: scale(1.1) rotate(1deg); }
+      66% { transform: scale(0.95) rotate(-1deg); }
+    }
+
+    /* Enhanced Header with Magenta Theme for Faculty */
+    .dashboard-header {
+      background: linear-gradient(135deg, rgba(255, 0, 255, 0.15), rgba(255, 20, 147, 0.2));
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 0, 255, 0.3);
+      padding: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), 0 0 80px rgba(255, 0, 255, 0.1);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .dashboard-title {
+      font-size: 3rem;
+      font-weight: 800;
+      font-family: 'Poppins', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin: 0 0 1.5rem 0;
+      background: linear-gradient(135deg, #ff00ff, #ff1493, #8b2cf7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 60px rgba(255, 0, 255, 0.5);
+      animation: title-glow 4s ease-in-out infinite;
+    }
+
+    @keyframes title-glow {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.2); }
+    }
+
+    /* Navigation with Magenta Accents */
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      color: #e9d5ff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 0, 255, 0.3);
+      background: rgba(255, 0, 255, 0.1);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 0.875rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-link::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(255, 0, 255, 0.4), transparent);
+      transform: translate(-50%, -50%);
+      transition: width 0.5s ease, height 0.5s ease;
+    }
+
+    .nav-link:hover::before {
+      width: 150%;
+      height: 150%;
+    }
+
+    .nav-link:hover {
+      color: #ff00ff;
+      border-color: #ff00ff;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(255, 0, 255, 0.4);
+      text-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
+    }
+
+    .nav-link.create {
+      border-color: rgba(57, 255, 20, 0.3);
+      background: rgba(57, 255, 20, 0.1);
+    }
+
+    .nav-link.create:hover {
+      color: #39ff14;
+      border-color: #39ff14;
+      box-shadow: 0 8px 25px rgba(57, 255, 20, 0.4);
+      text-shadow: 0 0 10px rgba(57, 255, 20, 0.8);
+    }
+
+    .nav-link.logout {
+      border-color: rgba(255, 20, 147, 0.3);
+      background: rgba(255, 20, 147, 0.1);
+    }
+
+    .nav-link.logout:hover {
+      color: #ff1493;
+      border-color: #ff1493;
+      box-shadow: 0 8px 25px rgba(255, 20, 147, 0.4);
+    }
+
+    /* Main Container */
+    .main-container {
+      max-width: 1200px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Welcome Card with Magenta Theme */
+    .welcome-card {
+      background: linear-gradient(145deg, rgba(255, 0, 255, 0.08), rgba(29, 0, 82, 0.8));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 0, 255, 0.3);
+      border-radius: 32px;
+      padding: 3rem;
+      margin-bottom: 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 100px rgba(255, 0, 255, 0.15),
+        inset 0 0 60px rgba(255, 0, 255, 0.05);
+      animation: welcome-pulse 8s ease-in-out infinite;
+    }
+
+    @keyframes welcome-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    .welcome-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(60deg, #ff00ff, #ff1493, #8b2cf7, #ff00ff);
+      border-radius: 32px;
+      opacity: 0.6;
+      z-index: -1;
+      animation: rotate 5s linear infinite;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .welcome-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #ffffff, #ff00ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .welcome-subtitle {
+      color: #e9d5ff;
+      font-size: 1.125rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.5rem;
+      background: linear-gradient(135deg, #ff00ff, #ff1493);
+      color: #ffffff;
+      border-radius: 24px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 20px rgba(255, 0, 255, 0.4);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .stat-card {
+      background: linear-gradient(145deg, rgba(29, 0, 82, 0.7), rgba(36, 0, 66, 0.8));
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 0, 255, 0.2);
+      border-radius: 24px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 0, 255, 0.1), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .stat-card:hover::after {
+      left: 100%;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px) scale(1.05);
+      border-color: #ff00ff;
+      box-shadow: 0 15px 40px rgba(255, 0, 255, 0.3);
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff00ff, #ff1493);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: #c084fc;
+      text-transform: uppercase;
+      font-size: 0.875rem;
+      letter-spacing: 1.5px;
+    }
+
+    /* Feature Cards Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: linear-gradient(145deg, rgba(36, 0, 66, 0.9), rgba(29, 0, 82, 0.95));
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 0, 255, 0.2);
+      border-radius: 24px;
+      padding: 2rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 0, 255, 0.1), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      border-color: #ff00ff;
+      box-shadow: 0 20px 50px rgba(255, 0, 255, 0.3), 0 0 80px rgba(255, 20, 147, 0.2);
+    }
+
+    .feature-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-description {
+      color: #e9d5ff;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #ff00ff, #cc00cc);
+      color: white;
+      border: 2px solid #ff00ff;
+      border-radius: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+      transform: translate(-50%, -50%);
+      transition: width 0.5s ease, height 0.5s ease;
+    }
+
+    .feature-btn:hover::before {
+      width: 200%;
+      height: 200%;
+    }
+
+    .feature-btn:hover {
+      background: linear-gradient(135deg, #8b2cf7, #6b00d4);
+      border-color: #8b2cf7;
+      transform: translateX(5px);
+      box-shadow: 0 5px 20px rgba(139, 44, 247, 0.4);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .dashboard-title { font-size: 2rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .features-grid { grid-template-columns: 1fr; }
+      .main-container { padding: 0 1rem; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .nav { flex-direction: column; }
+      .nav-link { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header class="dashboard-header" role="banner">
+    <div class="header-content">
+      <h1 class="dashboard-title">
+        <i class="fas fa-calendar-alt"></i> Event Manager Dashboard
+      </h1>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="{{ url_for('faculty.faculty_assignments') }}" class="nav-link">
+          <i class="fas fa-calendar-alt"></i> Events
+        </a>
+        <a href="{{ url_for('faculty.create_assignment') }}" class="nav-link create">
+          <i class="fas fa-plus-circle"></i> Create Event
+        </a>
+        <a href="{{ url_for('chatbot') }}" class="nav-link">
+          <i class="fas fa-robot"></i> AI Assistant
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link logout">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-container" role="main">
+    <!-- Welcome Section -->
+    <section class="welcome-card">
+      <h2 class="welcome-title">Welcome back, {{ user.username }}!</h2>
+      <p class="welcome-subtitle">Ready to manage and organize events today?</p>
+      <span class="role-badge">
+        <i class="fas fa-user-tie"></i> Event Manager
+      </span>
+    </section>
+
+    <!-- Statistics Grid -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">{{ assignments_count or 0 }}</div>
+        <div class="stat-label">Total Events</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ active_assignments or 0 }}</div>
+        <div class="stat-label">Active Events</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ total_submissions or 0 }}</div>
+        <div class="stat-label">Upcoming Submissions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ pending_reviews or 0 }}</div>
+        <div class="stat-label">Pending Reviews</div>
+      </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="features-grid">
+      <div class="feature-card">
+        <div class="feature-header">
+          <h3 class="feature-title">
+            <i class="fas fa-calendar-alt" style="color: #ff00ff;"></i> Manage Events
+          </h3>
+        </div>
+        <p class="feature-description">
+          View, edit, and manage all your events. Track student registrations and monitor abstract submission deadlines.
+        </p>
+        <a href="{{ url_for('faculty.faculty_assignments') }}" class="feature-btn">
+          <i class="fas fa-arrow-right"></i> View Events
+        </a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-header">
+          <h3 class="feature-title">
+            <i class="fas fa-plus-circle" style="color: #39ff14;"></i> Create Event
+          </h3>
+        </div>
+        <p class="feature-description">
+          Design new events with custom requirements, deadlines, and abstract submission criteria for students.
+        </p>
+        <a href="{{ url_for('faculty.create_assignment') }}" class="feature-btn">
+          <i class="fas fa-plus"></i> Create New
+        </a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-header">
+          <h3 class="feature-title">
+            <i class="fas fa-eye" style="color: #00ffff;"></i> Review Abstracts
+          </h3>
+        </div>
+        <p class="feature-description">
+          Review student abstract submissions, provide feedback, and assign grades efficiently.
+        </p>
+        <a href="{{ url_for('faculty.faculty_assignments') }}" class="feature-btn">
+          <i class="fas fa-check-circle"></i> Review Abstracts
+        </a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-header">
+          <h3 class="feature-title">
+            <i class="fas fa-chart-line" style="color: #8b2cf7;"></i> Analytics & Reports
+          </h3>
+        </div>
+        <p class="feature-description">
+          View detailed analytics on student performance, event participation rates, and abstract submission progress.
+        </p>
+        <a href="{{ url_for('faculty.analytics') }}" class="feature-btn">
+          <i class="fas fa-chart-bar"></i> View Analytics
+        </a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

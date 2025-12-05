@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Abstract Detail · CampusConnect</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='futuristic-violet.css') }}" rel="stylesheet">
+</head>
+<body>
+  <header class="header" role="banner">
+    <div class="header__inner">
+      <a class="brand" href="{{ url_for('main.dashboard') }}">
+        <i class="fas fa-graduation-cap"></i>
+        CampusConnect
+      </a>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="{{ url_for('faculty.view_submissions', assignment_id=submission['assignment_id']) }}"><i class="fas fa-arrow-left"></i> Back to Abstracts</a>
+        {% if submission['file_name'] %}
+          <a href="{{ url_for('faculty.view_submission_file', submission_id=submission['id']) }}"><i class="fas fa-file"></i> View File</a>
+        {% endif %}
+        <a href="{{ url_for('faculty.download_submission', submission_id=submission['id']) }}"><i class="fas fa-download"></i> Download</a>
+        <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="container">
+      <h1 class="header-title"><i class="fas fa-file-alt"></i> Abstract by {{ submission['student_username'] }}</h1>
+      
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="alerts">
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}" role="alert">
+                <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' if category == 'warning' else 'times-circle' }}"></i>
+                <span><strong>{{ category.capitalize() }}:</strong> {{ message }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <div class="grid">
+        <div class="card">
+          <div class="card__header">
+            <h2 class="card__title">Abstract Content</h2>
+            {% if submission['file_name'] %}
+              <p class="card__subtitle">File: {{ submission['file_name'] }} ({{ submission['file_type'] or 'unknown type' }}, {{ submission['file_size'] or '?' }} bytes)</p>
+            {% endif %}
+          </div>
+          <div class="card__content">
+            <pre class="submission-content">{{ submission['content'] }}</pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__header">
+            <h2 class="card__title">Grading</h2>
+          </div>
+          <div class="card__content">
+            <form method="POST" action="{{ url_for('faculty.grade_submission', submission_id=submission['id']) }}">
+              <div class="form-group">
+                <label for="grade" class="form-label">Grade (0-100)</label>
+                <input class="form-input" id="grade" name="grade" type="number" min="0" max="100" required value="{{ submission['grade'] if submission['grade'] is not none else '' }}" />
+              </div>
+              <div class="form-group">
+                <label for="feedback" class="form-label">Feedback</label>
+                <textarea class="form-input" id="feedback" name="feedback" rows="4" placeholder="Write feedback for the student...">{{ submission['feedback'] or '' }}</textarea>
+              </div>
+              <button class="btn btn-primary" type="submit">Save Grade</button>
+            </form>
+
+            <div class="plagiarism-section">
+              <h3 class="card__title">Plagiarism Report</h3>
+              <div class="plagiarism-score 
+                {% if overall_similarity > 60 %}plagiarism-high
+                {% elif overall_similarity > 20 %}plagiarism-medium
+                {% else %}plagiarism-low{% endif %}">
+                <p class="score-text">Overall Similarity: {{ overall_similarity }}%</p>
+                {% if plagiarism_report %}
+                  <ul class="plagiarism-list">
+                    {% for item in plagiarism_report %}
+                      <li>{{ item.similarity }} match with another abstract by <strong>{{ item.source_user }}</strong></li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p class="no-plagiarism">No significant similarity found with other abstracts.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

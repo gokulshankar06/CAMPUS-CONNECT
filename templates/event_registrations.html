@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.title }} - All Registrations · CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <div class="card glass-card">
+                <div class="card-header bg-transparent border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="mb-0"><i class="fas fa-users me-2"></i> {{ event.title }}</h1>
+                            <p class="text-muted mb-0">All Registrations</p>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('event_manager.events') }}" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Events
+                            </a>
+                            <a href="{{ url_for('event_manager.events') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-list me-2"></i>All Events
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Event Summary -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card glass-card">
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-md-3">
+                                            <div class="stat-box">
+                                                <h2 class="text-primary">{{ registrations|length }}</h2>
+                                                <p class="text-muted mb-0">Total Registrations</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="stat-box">
+                                                <h2 class="text-success">{{ registrations|selectattr('registration_status', 'equalto', 'approved')|list|length }}</h2>
+                                                <p class="text-muted mb-0">Approved</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="stat-box">
+                                                <h2 class="text-warning">{{ registrations|selectattr('registration_status', 'equalto', 'pending')|list|length }}</h2>
+                                                <p class="text-muted mb-0">Pending</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="stat-box">
+                                                <h2 class="text-info">{{ registrations|selectattr('team_name')|list|length }}</h2>
+                                                <p class="text-muted mb-0">In Teams</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Registrations Table -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card glass-card">
+                                <div class="card-header bg-transparent border-0">
+                                    <h3 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Registration Details</h3>
+                                </div>
+                                <div class="card-body">
+                                    {% if registrations %}
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Student</th>
+                                                        <th>Contact</th>
+                                                        <th>Team</th>
+                                                        <th>Status</th>
+                                                        <th>Registered</th>
+                                                        <th>Approved</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for registration in registrations %}
+                                                    <tr>
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                {% if registration.profile_pic %}
+                                                                    <img src="{{ url_for('static', filename=registration.profile_pic) }}"
+                                                                         class="rounded-circle me-3" width="40" height="40" alt="Profile">
+                                                                {% else %}
+                                                                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                                                                         style="width: 40px; height: 40px;">
+                                                                        <i class="fas fa-user text-white"></i>
+                                                                    </div>
+                                                                {% endif %}
+                                                                <div>
+                                                                    <div class="fw-bold">{{ registration.username }}</div>
+                                                                    {% if registration.full_name %}
+                                                                        <small class="text-muted">{{ registration.full_name }}</small>
+                                                                    {% endif %}
+                                                                    {% if registration.department %}
+                                                                        <br><small class="text-muted">{{ registration.department }}{% if registration.year %} - Year {{ registration.year }}{% endif %}</small>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div>
+                                                                <i class="fas fa-envelope me-1"></i>{{ registration.email }}
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            {% if registration.team_name %}
+                                                                <span class="badge bg-info">
+                                                                    <i class="fas fa-users me-1"></i>{{ registration.team_name }}
+                                                                </span>
+                                                            {% else %}
+                                                                <span class="text-muted">
+                                                                    <i class="fas fa-user me-1"></i>Individual
+                                                                </span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            {% if registration.registration_status == 'approved' %}
+                                                                <span class="badge bg-success">
+                                                                    <i class="fas fa-check me-1"></i>Approved
+                                                                </span>
+                                                            {% elif registration.registration_status == 'pending' %}
+                                                                <span class="badge bg-warning">
+                                                                    <i class="fas fa-clock me-1"></i>Pending
+                                                                </span>
+                                                            {% elif registration.registration_status == 'rejected' %}
+                                                                <span class="badge bg-danger">
+                                                                    <i class="fas fa-times me-1"></i>Rejected
+                                                                </span>
+                                                            {% else %}
+                                                                <span class="badge bg-secondary">
+                                                                    {{ registration.registration_status|title }}
+                                                                </span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            <div>
+                                                                <div>{{ registration.registered_at|format_datetime }}</div>
+                                                                {% if registration.approved_at %}
+                                                                    <small class="text-success">
+                                                                        <i class="fas fa-check me-1"></i>Approved: {{ registration.approved_at|format_datetime }}
+                                                                    </small>
+                                                                {% endif %}
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            {% if registration.approved_at %}
+                                                                <small class="text-success">
+                                                                    <i class="fas fa-user-check me-1"></i>{{ registration.approved_by or 'Auto' }}
+                                                                </small>
+                                                            {% else %}
+                                                                <span class="text-muted">-</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            <div class="btn-group" role="group">
+                                                                {% if registration.registration_status == 'pending' %}
+                                                                    <form method="POST" action="{{ url_for('event_manager.approve_registration', registration_id=registration.id) }}" style="display: inline;">
+                                                                        <button type="submit" class="btn btn-sm btn-success"
+                                                                                onclick="return confirm('Approve registration for {{ registration.username }}?')">
+                                                                            <i class="fas fa-check"></i> Approve
+                                                                        </button>
+                                                                    </form>
+                                                                {% endif %}
+                                                                <button class="btn btn-sm btn-outline-info" title="View Details">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <!-- Bulk Actions -->
+                                        <div class="mt-4 p-3 bg-light rounded">
+                                            <h6>Bulk Actions</h6>
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                <button class="btn btn-sm btn-outline-success" onclick="approveAllPending()">
+                                                    <i class="fas fa-check-double me-1"></i>Approve All Pending
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-primary" onclick="exportRegistrations()">
+                                                    <i class="fas fa-download me-1"></i>Export to CSV
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-info" onclick="sendNotification()">
+                                                    <i class="fas fa-bell me-1"></i>Notify All
+                                                </button>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-5">
+                                            <i class="fas fa-users-slash fa-4x text-muted mb-3"></i>
+                                            <h4 class="text-muted">No registrations yet</h4>
+                                            <p class="text-muted">Students will appear here once they register for this event.</p>
+                                            <a href="{{ url_for('events.browse_events') }}" class="btn btn-primary">
+                                                <i class="fas fa-eye me-2"></i>View Public Events
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Actions Modal -->
+<div class="modal fade" id="bulkActionsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bulk Actions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Action Type</label>
+                    <select class="form-select" id="bulkActionType">
+                        <option value="approve">Approve All Pending</option>
+                        <option value="notify">Send Notification</option>
+                        <option value="export">Export Data</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="notificationMessage" style="display: none;">
+                    <label class="form-label">Message</label>
+                    <textarea class="form-control" rows="3" placeholder="Enter notification message..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="executeBulkAction()">Execute</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .stat-box {
+        padding: 1.5rem;
+        border-radius: 10px;
+        background: rgba(139, 44, 247, 0.1);
+        margin-bottom: 1rem;
+        border: 1px solid rgba(139, 44, 247, 0.2);
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        background: rgba(139, 44, 247, 0.1);
+    }
+
+    .table td {
+        vertical-align: middle;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .btn-group .btn {
+        margin-right: 0.25rem;
+    }
+
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+
+    .bg-light {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    function approveAllPending() {
+        if (confirm('Are you sure you want to approve all pending registrations?')) {
+            // This would typically make an AJAX call to a bulk approval endpoint
+            alert('Bulk approval functionality would be implemented here.');
+        }
+    }
+
+    function exportRegistrations() {
+        // Create CSV export
+        const table = document.querySelector('table');
+        const rows = table.querySelectorAll('tr');
+        let csv = [];
+
+        rows.forEach(row => {
+            const cols = row.querySelectorAll('td, th');
+            const rowData = [];
+            cols.forEach(col => {
+                rowData.push(col.textContent.trim());
+            });
+            csv.push(rowData.join(','));
+        });
+
+        const csvContent = csv.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'registrations_{{ event.id }}_{{ event.title|replace(" ", "_") }}.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    function sendNotification() {
+        const modal = new bootstrap.Modal(document.getElementById('bulkActionsModal'));
+        document.getElementById('bulkActionType').value = 'notify';
+        document.getElementById('notificationMessage').style.display = 'block';
+        modal.show();
+    }
+
+    function executeBulkAction() {
+        const actionType = document.getElementById('bulkActionType').value;
+        const message = document.querySelector('#notificationMessage textarea').value;
+
+        if (actionType === 'notify' && !message.trim()) {
+            alert('Please enter a notification message.');
+            return;
+        }
+
+        // This would typically make an AJAX call to execute the bulk action
+        alert(`Bulk ${actionType} functionality would be implemented here.`);
+        bootstrap.Modal.getInstance(document.getElementById('bulkActionsModal')).hide();
+    }
+
+    // Auto-refresh functionality (optional)
+    function refreshRegistrations() {
+        location.reload();
+    }
+
+    // Set up auto-refresh every 30 seconds if there are pending registrations
+    var hasPendingRegistrations = {{ (registrations|selectattr('registration_status', 'equalto', 'pending')|list|length > 0)|tojson }};
+    if (hasPendingRegistrations) {
+        setInterval(refreshRegistrations, 30000);
+    }
+</script>
+{% endblock %}

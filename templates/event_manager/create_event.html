@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+
+{% block title %}Create New Event - CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Create New Event</h4>
+                </div>
+                <div class="card-body">
+                    <form id="eventForm" method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Basic Information -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">Basic Information</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form.title.label(class="form-label") }}
+                                        {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""), 
+                                            placeholder="Enter event title") }}
+                                        {% for error in form.title.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form.event_type.label(class="form-label") }}
+                                        {{ form.event_type(class="form-select" + (" is-invalid" if form.event_type.errors else "")) }}
+                                        {% for error in form.event_type.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        {{ form.description.label(class="form-label") }}
+                                        {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), 
+                                            rows=4, placeholder="Enter event description") }}
+                                        {% for error in form.description.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Date & Time -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">Date & Time</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {{ form.start_date.label(class="form-label") }}
+                                        {{ form.start_date(class="form-control" + (" is-invalid" if form.start_date.errors else ""), 
+                                            type="datetime-local") }}
+                                        {% for error in form.start_date.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {{ form.end_date.label(class="form-label") }}
+                                        {{ form.end_date(class="form-control" + (" is-invalid" if form.end_date.errors else ""), 
+                                            type="datetime-local") }}
+                                        {% for error in form.end_date.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {{ form.registration_deadline.label(class="form-label") }}
+                                        {{ form.registration_deadline(class="form-control" + (" is-invalid" if form.registration_deadline.errors else ""), 
+                                            type="datetime-local") }}
+                                        {% for error in form.registration_deadline.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Team Settings -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">Team Settings</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="form-check form-switch mb-3">
+                                        {{ form.is_team_event(class="form-check-input", id="teamEventToggle") }}
+                                        {{ form.is_team_event.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4 team-settings">
+                                    <div class="form-group">
+                                        {{ form.min_team_size.label(class="form-label") }}
+                                        {{ form.min_team_size(class="form-control" + (" is-invalid" if form.min_team_size.errors else "")) }}
+                                        {% for error in form.min_team_size.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4 team-settings">
+                                    <div class="form-group">
+                                        {{ form.max_team_size.label(class="form-label") }}
+                                        {{ form.max_team_size(class="form-control" + (" is-invalid" if form.max_team_size.errors else "")) }}
+                                        {% for error in form.max_team_size.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Abstract Submission Settings -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">Abstract Submission</h5>
+                            <div class="form-check form-switch mb-3">
+                                {{ form.requires_abstract(class="form-check-input", id="abstractToggle") }}
+                                {{ form.requires_abstract.label(class="form-check-label") }}
+                            </div>
+                            
+                            <div id="abstractSettings" class="ps-4 border-start border-3 border-primary">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.abstract_min_words.label(class="form-label") }}
+                                            {{ form.abstract_min_words(class="form-control") }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.abstract_max_words.label(class="form-label") }}
+                                            {{ form.abstract_max_words(class="form-control") }}
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            {{ form.allowed_file_types.label(class="form-label") }}
+                                            {{ form.allowed_file_types(class="form-control") }}
+                                            <small class="form-text text-muted">Comma-separated list of allowed file extensions (e.g., pdf,docx,txt)</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.max_file_size_mb.label(class="form-label") }}
+                                            <div class="input-group">
+                                                {{ form.max_file_size_mb(class="form-control") }}
+                                                <span class="input-group-text">MB</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.plagiarism_threshold.label(class="form-label") }}
+                                            <div class="input-group">
+                                                {{ form.plagiarism_threshold(class="form-control") }}
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            {{ form.auto_approve_threshold.label(class="form-label") }}
+                                            <div class="input-group">
+                                                {{ form.auto_approve_threshold(class="form-control") }}
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                            <small class="form-text text-muted">Abstracts with plagiarism score below this will be auto-approved</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Registration Settings -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">Registration Settings</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form.join_policy.label(class="form-label") }}
+                                        {% for subfield in form.join_policy %}
+                                            <div class="form-check">
+                                                {{ subfield(class="form-check-input") }}
+                                                {{ subfield.label(class="form-check-label") }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form.max_participants.label(class="form-label") }}
+                                        {{ form.max_participants(class="form-control") }}
+                                        <small class="form-text text-muted">Leave empty for unlimited participants</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">Additional Information</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form.venue.label(class="form-label") }}
+                                        {{ form.venue(class="form-control", placeholder="e.g., Main Auditorium, Room 101") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form.prize_pool.label(class="form-label") }}
+                                        {{ form.prize_pool(class="form-control", placeholder="e.g., $1000") }}
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        {{ form.resources_link.label(class="form-label") }}
+                                        {{ form.resources_link(class="form-control", placeholder="e.g., https://drive.google.com/...") }}
+                                        <small class="form-text text-muted">Link to additional resources (rules, guidelines, etc.)</small>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        {{ form.banner_image.label(class="form-label") }}
+                                        {{ form.banner_image(class="form-control") }}
+                                        <small class="form-text text-muted">Recommended size: 1200x400px</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('event_manager.events') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Create Event
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Toggle team settings based on team event checkbox
+    const teamEventToggle = document.getElementById('teamEventToggle');
+    const teamSettings = document.querySelectorAll('.team-settings');
+    
+    function updateTeamSettings() {
+        teamSettings.forEach(el => {
+            el.style.display = teamEventToggle.checked ? 'block' : 'none';
+        });
+    }
+    
+    // Toggle abstract settings based on requires_abstract checkbox
+    const abstractToggle = document.getElementById('abstractToggle');
+    const abstractSettings = document.getElementById('abstractSettings');
+    
+    function updateAbstractSettings() {
+        abstractSettings.style.display = abstractToggle.checked ? 'block' : 'none';
+    }
+    
+    // Initialize toggles
+    document.addEventListener('DOMContentLoaded', function() {
+        updateTeamSettings();
+        updateAbstractSettings();
+        
+        teamEventToggle.addEventListener('change', updateTeamSettings);
+        abstractToggle.addEventListener('change', updateAbstractSettings);
+    });
+</script>
+{% endblock %}

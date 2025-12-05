@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress - CampusConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='futuristic-violet.css') }}" rel="stylesheet">
+    <style>
+        /* Page-Specific Student Progress Styles */
+        body {
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Analytics wave pattern */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 30%, rgba(139, 44, 247, 0.15) 0%, transparent 45%),
+                radial-gradient(circle at 50% 80%, rgba(0, 191, 255, 0.1) 0%, transparent 50%);
+            animation: analytics-flow 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes analytics-flow {
+            0%, 100% { transform: scale(1) translateY(0); }
+            33% { transform: scale(1.05) translateY(-20px); }
+            66% { transform: scale(0.95) translateY(20px); }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header Section */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 3rem;
+            font-weight: 800;
+            font-family: 'Poppins', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #00ffff, #00bfff, #8b2cf7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+            margin: 0;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(139, 44, 247, 0.1);
+            border: 1px solid rgba(139, 44, 247, 0.3);
+            border-radius: 24px;
+            color: #e9d5ff;
+            text-decoration: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: #00ffff;
+            color: #00ffff;
+            transform: translateX(-5px);
+            box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3);
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        /* Chart Cards */
+        .card {
+            background: linear-gradient(145deg, rgba(0, 191, 255, 0.05), rgba(29, 0, 82, 0.85));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 
+                0 10px 40px rgba(0, 0, 0, 0.3),
+                0 0 60px rgba(0, 255, 255, 0.05),
+                inset 0 0 30px rgba(0, 255, 255, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.05), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #00ffff;
+            box-shadow: 
+                0 15px 50px rgba(0, 0, 0, 0.4),
+                0 0 80px rgba(0, 255, 255, 0.15);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Metrics */
+        .metric {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: rgba(0, 255, 255, 0.05);
+            border-left: 3px solid #00ffff;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .metric:hover {
+            background: rgba(0, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .metric .num {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00ffff, #00bfff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .metric span:last-child {
+            color: #e9d5ff;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.875rem;
+        }
+
+        /* Chart Container */
+        canvas {
+            max-height: 300px;
+        }
+
+        /* Progress Bar Styles */
+        .progress-container {
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #00bfff, #8b2cf7);
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+            color: #e9d5ff;
+            font-weight: 600;
+        }
+
+        .progress-percentage {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        /* Circular Progress */
+        .circular-progress {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+        }
+
+        .circular-progress svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .circular-progress circle {
+            fill: none;
+            stroke-width: 8;
+        }
+
+        .circular-progress .bg {
+            stroke: rgba(0, 255, 255, 0.1);
+        }
+
+        .circular-progress .progress {
+            stroke: url(#gradient);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s ease-in-out;
+        }
+
+        .circular-progress .text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ffff;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        /* Chart Error Fallback */
+        .chart-error {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: #a78bfa;
+            text-align: center;
+        }
+
+        .chart-error i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .page-title {
+                font-size: 2rem;
+            }
+            .container {
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .back-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title"><i class="fas fa-chart-line"></i> Your Progress</h1>
+            <a href="{{ url_for('main.dashboard') }}" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-tachometer-alt" style="color: #00ffff;"></i> Statistics</h3>
+                <div class="metric"><span class="num">{{ completed_assignments }}</span><span>Attended</span></div>
+                <div class="metric"><span class="num">{{ pending_assignments }}</span><span>Upcoming</span></div>
+                <div class="metric"><span class="num">{{ total_assignments }}</span><span>Total Events</span></div>
+                <div class="metric"><span class="num">{{ grade_average or 'N/A' }}</span><span>Average Grade</span></div>
+                
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-text">
+                        <span>Event Attendance</span>
+                        <span class="progress-percentage">{{ ((completed_assignments / total_assignments * 100) if total_assignments > 0 else 0)|round|int }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ ((completed_assignments / total_assignments * 100) if total_assignments > 0 else 0)|round|int }}%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-chart-bar" style="color: #00ffff;"></i> Recent Grades</h3>
+                <div id="gradesBarContainer">
+                    <canvas id="gradesBar"></canvas>
+                    <div id="gradesBarError" class="chart-error" style="display: none;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Unable to load chart data</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-chart-pie" style="color: #00ffff;"></i> Completion Overview</h3>
+                <div id="progressPieContainer">
+                    <canvas id="progressPie"></canvas>
+                    <div id="progressPieError" class="chart-error" style="display: none;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Unable to load chart data</p>
+                    </div>
+                </div>
+                
+                <!-- Circular Progress Fallback -->
+                <div id="circularProgress" class="circular-progress" style="display: none;">
+                    <svg>
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#00ffff;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#00bfff;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#8b2cf7;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle class="bg" cx="60" cy="60" r="50"></circle>
+                        <circle class="progress" cx="60" cy="60" r="50" stroke-dasharray="314" stroke-dashoffset="314"></circle>
+                    </svg>
+                    <div class="text" id="circularProgressText">0%</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-chart-area" style="color: #00ffff;"></i> Grade Distribution</h3>
+                <div id="gradeDistContainer">
+                    <canvas id="gradeDist"></canvas>
+                    <div id="gradeDistError" class="chart-error" style="display: none;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Unable to load chart data</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="progress-data"
+         data-grades-labels='{{ grades_labels|tojson|safe }}'
+         data-grades-values='{{ grades_values|tojson|safe }}'
+         data-completed='{{ completed_assignments|default(0) }}'
+         data-pending='{{ pending_assignments|default(0) }}'
+         data-dist-labels='{{ dist_labels|tojson|safe }}'
+         data-dist-values='{{ dist_values|tojson|safe }}'
+         style="display:none;"></div>
+
+    <script>
+        const dataEl = document.getElementById('progress-data');
+        const labels = JSON.parse(dataEl.dataset.gradesLabels || '[]');
+        const values = JSON.parse(dataEl.dataset.gradesValues || '[]');
+        const completed = parseInt(dataEl.dataset.completed || '0', 10);
+        const pending = parseInt(dataEl.dataset.pending || '0', 10);
+        const distLabels = JSON.parse(dataEl.dataset.distLabels || '[]');
+        const distValues = JSON.parse(dataEl.dataset.distValues || '[]');
+
+        // Chart.js global defaults for futuristic theme
+        Chart.defaults.color = '#e9d5ff';
+        Chart.defaults.borderColor = 'rgba(0, 255, 255, 0.1)';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+
+        // Function to show error fallback
+        function showChartError(chartId, errorId) {
+            document.getElementById(chartId).style.display = 'none';
+            document.getElementById(errorId).style.display = 'flex';
+        }
+
+        // Function to update circular progress
+        function updateCircularProgress(percentage) {
+            const circularProgress = document.getElementById('circularProgress');
+            const progressCircle = circularProgress.querySelector('.progress');
+            const progressText = document.getElementById('circularProgressText');
+            
+            const circumference = 2 * Math.PI * 50; // radius = 50
+            const offset = circumference - (percentage / 100) * circumference;
+            
+            progressCircle.style.strokeDashoffset = offset;
+            progressText.textContent = percentage + '%';
+            
+            circularProgress.style.display = 'block';
+        }
+
+        // Create Grades Bar Chart
+        try {
+            new Chart(document.getElementById('gradesBar'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Grade',
+                        data: values,
+                        backgroundColor: 'rgba(0, 255, 255, 0.6)',
+                        borderColor: 'rgba(0, 255, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#e9d5ff' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#c084fc' },
+                            grid: { color: 'rgba(139, 44, 247, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#c084fc' },
+                            grid: { color: 'rgba(139, 44, 247, 0.1)' }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error creating grades bar chart:', error);
+            showChartError('gradesBar', 'gradesBarError');
+        }
+
+        // Create Progress Pie Chart
+        try {
+            new Chart(document.getElementById('progressPie'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'Pending'],
+                    datasets: [{
+                        data: [completed, pending],
+                        backgroundColor: [
+                            'rgba(0, 255, 255, 0.7)',  // Cyan for completed
+                            'rgba(255, 0, 191, 0.7)'   // Magenta for pending
+                        ],
+                        borderColor: [
+                            'rgba(0, 255, 255, 1)',
+                            'rgba(255, 0, 191, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#e9d5ff' }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error creating progress pie chart:', error);
+            showChartError('progressPie', 'progressPieError');
+            // Show circular progress as fallback
+            const total = completed + pending;
+            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+            updateCircularProgress(percentage);
+        }
+
+        // Create Grade Distribution Chart
+        try {
+            new Chart(document.getElementById('gradeDist'), {
+                type: 'bar',
+                data: {
+                    labels: distLabels,
+                    datasets: [{
+                        label: 'Count',
+                        data: distValues,
+                        backgroundColor: 'rgba(139, 44, 247, 0.6)',
+                        borderColor: 'rgba(139, 44, 247, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#e9d5ff' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#c084fc' },
+                            grid: { color: 'rgba(139, 44, 247, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#c084fc' },
+                            grid: { color: 'rgba(139, 44, 247, 0.1)' }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error creating grade distribution chart:', error);
+            showChartError('gradeDist', 'gradeDistError');
+        }
+    </script>
+</body>
+</html>
+

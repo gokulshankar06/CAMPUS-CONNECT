@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Abstracts - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="header-section mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="dashboard-title">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Abstract Management
+                        </h1>
+                        <p class="text-muted">{{ event.title }} - {{ event.event_type|title }}</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('event_manager.export_abstracts', event_id=event.id) }}" class="btn btn-success">
+                            <i class="fas fa-download me-1"></i>Export CSV
+                        </a>
+                        <a href="{{ url_for('event_manager.event_registrations', event_id=event.id) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Event
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-primary">{{ stats.total or 0 }}</h3>
+                            <small class="text-muted">Total</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-warning">{{ stats.draft or 0 }}</h3>
+                            <small class="text-muted">Draft</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-info">{{ stats.submitted or 0 }}</h3>
+                            <small class="text-muted">Submitted</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-secondary">{{ stats.under_review or 0 }}</h3>
+                            <small class="text-muted">Under Review</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-success">{{ stats.approved or 0 }}</h3>
+                            <small class="text-muted">Approved</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="text-danger">{{ stats.rejected or 0 }}</h3>
+                            <small class="text-muted">Rejected</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters and Search -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="status" class="form-label">Filter by Status</label>
+                            <select class="form-select" id="status" name="status" onchange="this.form.submit()">
+                                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
+                                <option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>Draft</option>
+                                <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>Submitted</option>
+                                <option value="under_review" {% if status_filter == 'under_review' %}selected{% endif %}>Under Review</option>
+                                <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                                <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                                <option value="revision_required" {% if status_filter == 'revision_required' %}selected{% endif %}>Revision Required</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{ search_query }}" placeholder="Search by student name, username, or title...">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-1"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bulk Actions -->
+            {% if submissions %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('event_manager.bulk_abstract_action', event_id=event.id) }}" id="bulkForm">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <select class="form-select" name="bulk_action" required>
+                                    <option value="">Select Action...</option>
+                                    <option value="approve">Approve Selected</option>
+                                    <option value="reject">Reject Selected</option>
+                                    <option value="mark_under_review">Mark Under Review</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-warning" onclick="return confirmBulkAction()">
+                                    <i class="fas fa-tasks me-1"></i>Apply to Selected
+                                </button>
+                                <span class="ms-2 text-muted" id="selectedCount">0 selected</span>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="selectAll()">
+                                    Select All
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="selectNone()">
+                                    Select None
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Submissions Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        Abstract Submissions
+                        {% if submissions %}
+                        <span class="badge bg-primary ms-2">{{ submissions|length }}</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if submissions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th width="30">
+                                        <input type="checkbox" id="selectAllCheckbox" onchange="toggleAll()">
+                                    </th>
+                                    <th>Student</th>
+                                    <th>Title</th>
+                                    <th>Team</th>
+                                    <th>Status</th>
+                                    <th>Word Count</th>
+                                    <th>Plagiarism</th>
+                                    <th>Submitted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for submission in submissions %}
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" name="submission_ids" value="{{ submission.id }}" 
+                                               class="submission-checkbox" onchange="updateSelectedCount()">
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>{{ submission.full_name or submission.username }}</strong><br>
+                                            <small class="text-muted">{{ submission.email }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-truncate" style="max-width: 200px;" title="{{ submission.title }}">
+                                            {{ submission.title }}
+                                        </div>
+                                        <small class="text-muted">v{{ submission.version }}</small>
+                                    </td>
+                                    <td>
+                                        {% if submission.team_name %}
+                                        <span class="badge bg-info">{{ submission.team_name }}</span>
+                                        {% else %}
+                                        <span class="text-muted">Individual</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if submission.status == 'approved' 
+                                                                else 'warning' if submission.status == 'draft' 
+                                                                else 'info' if submission.status == 'submitted'
+                                                                else 'secondary' if submission.status == 'under_review'
+                                                                else 'primary' if submission.status == 'revision_required'
+                                                                else 'danger' }}">
+                                            {{ submission.status|replace('_', ' ')|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="{% if submission.word_count < (event.abstract_min_words or 150) or submission.word_count > (event.abstract_max_words or 500) %}text-danger{% else %}text-success{% endif %}">
+                                            {{ submission.word_count }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if submission.plagiarism_score is not none %}
+                                        {% set plagiarism_percent = (submission.plagiarism_score * 100)|round(1) %}
+                                        {% set threshold_percent = event.plagiarism_threshold or 80 %}
+                                        <span class="{% if plagiarism_percent > threshold_percent %}text-danger{% else %}text-success{% endif %}">
+                                            {{ plagiarism_percent }}%
+                                        </span>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if submission.submitted_at %}
+                                        {{ submission.submitted_at|format_datetime }}
+                                        {% else %}
+                                        <span class="text-muted">Draft</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('abstracts.view_submission', submission_id=submission.id) }}" 
+                                               class="btn btn-outline-primary" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if submission.status in ['submitted', 'under_review', 'revision_required'] %}
+                                            <a href="{{ url_for('event_manager.review_abstract', submission_id=submission.id) }}" 
+                                               class="btn btn-outline-success" title="Review">
+                                                <i class="fas fa-gavel"></i>
+                                            </a>
+                                            {% endif %}
+                                            {% if submission.file_path %}
+                                            <a href="{{ url_for('static', filename=submission.file_path|replace('static/','', 1)) }}" 
+                                               class="btn btn-outline-info" title="Download File" target="_blank">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Abstract Submissions</h5>
+                        <p class="text-muted">
+                            {% if status_filter != 'all' or search_query %}
+                            No submissions match your current filters.
+                            <a href="{{ url_for('event_manager.manage_abstracts', event_id=event.id) }}">Clear filters</a>
+                            {% else %}
+                            No abstracts have been submitted for this event yet.
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateSelectedCount() {
+    const checkboxes = document.querySelectorAll('.submission-checkbox:checked');
+    const count = checkboxes.length;
+    document.getElementById('selectedCount').textContent = count + ' selected';
+    
+    // Update bulk action form checkboxes
+    const bulkForm = document.getElementById('bulkForm');
+    const existingCheckboxes = bulkForm.querySelectorAll('input[name="submission_ids"]');
+    existingCheckboxes.forEach(cb => cb.remove());
+    
+    checkboxes.forEach(cb => {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'submission_ids';
+        hiddenInput.value = cb.value;
+        bulkForm.appendChild(hiddenInput);
+    });
+}
+
+function toggleAll() {
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const checkboxes = document.querySelectorAll('.submission-checkbox');
+    
+    checkboxes.forEach(cb => {
+        cb.checked = selectAllCheckbox.checked;
+    });
+    
+    updateSelectedCount();
+}
+
+function selectAll() {
+    const checkboxes = document.querySelectorAll('.submission-checkbox');
+    checkboxes.forEach(cb => cb.checked = true);
+    document.getElementById('selectAllCheckbox').checked = true;
+    updateSelectedCount();
+}
+
+function selectNone() {
+    const checkboxes = document.querySelectorAll('.submission-checkbox');
+    checkboxes.forEach(cb => cb.checked = false);
+    document.getElementById('selectAllCheckbox').checked = false;
+    updateSelectedCount();
+}
+
+function confirmBulkAction() {
+    const selectedCount = document.querySelectorAll('.submission-checkbox:checked').length;
+    const action = document.querySelector('select[name="bulk_action"]').value;
+    
+    if (selectedCount === 0) {
+        alert('Please select at least one submission.');
+        return false;
+    }
+    
+    if (!action) {
+        alert('Please select an action.');
+        return false;
+    }
+    
+    const actionText = action.replace('_', ' ');
+    return confirm(`Are you sure you want to ${actionText} ${selectedCount} submission(s)?`);
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    updateSelectedCount();
+});
+</script>
+
+<style>
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+.btn-group-sm > .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.badge {
+    font-size: 0.75em;
+}
+</style>
+{% endblock %}

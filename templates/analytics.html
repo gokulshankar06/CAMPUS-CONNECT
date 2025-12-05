@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Event Analytics{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Event Analytics</h1>
+    {% if stats %}
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Events</h6>
+                    <p class="display-6 mb-0">{{ stats.total_events or 0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Upcoming</h6>
+                    <p class="display-6 mb-0">{{ stats.upcoming_events or 0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div a="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Registrations</h6>
+                    <p class="display-6 mb-0">{{ stats.total_registrations or 0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Unique Participants</h6>
+                    <p class="display-6 mb-0">{{ stats.unique_participants or 0 }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">No analytics data available yet.</div>
+    {% endif %}
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Recent Events</h5>
+        </div>
+        <div class="card-body">
+            {% if participation_data %}
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Status</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Registrations</th>
+                            <th>Participants</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in participation_data %}
+                        <tr>
+                            <td>{{ event.title }}</td>
+                            <td>{{ event.status|title }}</td>
+                            <td>{{ event.start_date|format_date }}</td>
+                            <td>{{ event.end_date|format_date }}</td>
+                            <td>{{ event.registration_count or 0 }}</td>
+                            <td>{{ event.unique_participants or 0 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="mb-0">No recent events found.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Event Types</h5>
+                </div>
+                <div class="card-body">
+                    {% if event_types %}
+                    <ul class="list-group list-group-flush">
+                        {% for item in event_types %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ item.event_type or 'Unknown' }}</span>
+                            <span class="badge bg-primary rounded-pill">{{ item.registration_count or 0 }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="mb-0">No event type data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Registration Trends</h5>
+                </div>
+                <div class="card-body">
+                    {% if registration_trends %}
+                    <ul class="list-group list-group-flush">
+                        {% for row in registration_trends %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ row.month }}</span>
+                            <span class="badge bg-success rounded-pill">{{ row.registrations }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="mb-0">No trend data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

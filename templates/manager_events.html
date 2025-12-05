@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Events · CampusConnect</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='futuristic-violet.css') }}" rel="stylesheet">
+  <style>
+    /* Page-Specific Event Manager Events Styles */
+    body {
+      min-height: 100vh;
+      position: relative;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Data stream background pattern */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        linear-gradient(90deg, rgba(255, 0, 255, 0.01) 1px, transparent 1px),
+        linear-gradient(rgba(255, 0, 255, 0.01) 1px, transparent 1px),
+        radial-gradient(ellipse at 70% 40%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 70%, rgba(139, 44, 247, 0.2) 0%, transparent 55%);
+      background-size: 40px 40px, 40px 40px, cover, cover;
+      animation: data-flow 30s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes data-flow {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(40px); }
+    }
+
+    /* Header with Events Focus */
+    .page-header {
+      background: linear-gradient(135deg, rgba(255, 0, 255, 0.1), rgba(139, 44, 247, 0.15));
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 0, 255, 0.3);
+      padding: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), 0 0 60px rgba(255, 0, 255, 0.1);
+      text-align: center;
+    }
+
+    .page-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+      text-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .page-header h1 i {
+      color: #ff00ff;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .nav a {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(139, 44, 247, 0.2));
+      border: 1px solid rgba(255, 0, 255, 0.4);
+      border-radius: 10px;
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+
+    .nav a:hover {
+      background: linear-gradient(135deg, rgba(255, 0, 255, 0.3), rgba(139, 44, 247, 0.3));
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(255, 0, 255, 0.3);
+    }
+
+    .content-wrapper {
+      position: relative;
+      z-index: 1;
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .event-card {
+      background: linear-gradient(145deg, rgba(255, 0, 255, 0.05), rgba(29, 0, 82, 0.85));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 0, 255, 0.2);
+      border-radius: 20px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+      animation: float-card 6s ease-in-out infinite;
+    }
+
+    .event-card:nth-child(odd) {
+      animation-delay: 0.5s;
+    }
+
+    @keyframes float-card {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .event-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(255, 0, 255, 0.3);
+    }
+
+    .event-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .event-title {
+      color: #00ffff;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 0;
+      flex: 1;
+    }
+
+    .event-type {
+      background: linear-gradient(135deg, #ff00ff, #8b2cf7);
+      color: #fff;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .event-description {
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .event-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+    }
+
+    .detail-item i {
+      color: #ff00ff;
+      width: 16px;
+    }
+
+    .event-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .status-upcoming {
+      background: linear-gradient(135deg, #39ff14, #00ff88);
+      color: #0a0015;
+    }
+
+    .status-ongoing {
+      background: linear-gradient(135deg, #ff00ff, #00ffff);
+      color: #0a0015;
+    }
+
+    .status-completed {
+      background: linear-gradient(135deg, #8b2cf7, #a855f7);
+      color: #fff;
+    }
+
+    .event-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #39ff14, #00ff88);
+      color: #0a0015;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(57, 255, 20, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #ff00ff, #ff1493);
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 0, 255, 0.4);
+    }
+
+    .no-events {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      padding: 3rem 2rem;
+      font-style: italic;
+    }
+
+    .no-events i {
+      font-size: 3rem;
+      color: #ff00ff;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .create-event-btn {
+      background: linear-gradient(135deg, #39ff14, #00ff88);
+      color: #0a0015;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+      margin: 2rem auto;
+    }
+
+    .create-event-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(57, 255, 20, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .page-header h1 {
+        font-size: 2rem;
+      }
+
+      .events-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .event-details {
+        grid-template-columns: 1fr;
+      }
+
+      .nav {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .event-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header" role="banner">
+    <h1><i class="fas fa-calendar-alt"></i> My Events</h1>
+    <p style="color: rgba(255, 255, 255, 0.9); margin-bottom: 1rem;">Manage all your created events and track registrations.</p>
+    <nav class="nav" role="navigation" aria-label="Event Manager Navigation">
+      <a href="{{ url_for('main.dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="{{ url_for('event_manager.create_event') }}"><i class="fas fa-plus"></i> Create Event</a>
+      <a href="{{ url_for('event_manager.analytics') }}"><i class="fas fa-chart-bar"></i> Analytics</a>
+      <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+  </header>
+
+  <main class="content-wrapper">
+    {% if events %}
+      <div class="events-grid">
+        {% for event in events %}
+          <div class="event-card">
+            <div class="event-header">
+              <h3 class="event-title">{{ event.title }}</h3>
+              <span class="event-type">{{ event.event_type|title }}</span>
+            </div>
+
+            <p class="event-description">{{ event.description|truncate(150) }}</p>
+
+            <div class="event-details">
+              <div class="detail-item">
+                <i class="fas fa-calendar"></i>
+                <span>{{ event.start_date }}</span>
+              </div>
+              <div class="detail-item">
+                <i class="fas fa-clock"></i>
+                <span>{{ event.end_date }}</span>
+              </div>
+              <div class="detail-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ event.venue or 'Online' }}</span>
+              </div>
+              <div class="detail-item">
+                <i class="fas fa-users"></i>
+                <span>{{ event.max_participants or 'Unlimited' }} participants</span>
+              </div>
+            </div>
+
+            <div class="event-status status-{{ event.status }}">
+              <i class="fas fa-circle"></i>
+              {{ event.status|title }}
+            </div>
+
+            <div class="event-actions">
+              <a href="{{ url_for('event_manager.event_registrations', event_id=event.id) }}" class="btn-primary">
+                <i class="fas fa-eye"></i> View Details
+              </a>
+              <a href="{{ url_for('event_manager.event_registrations', event_id=event.id) }}" class="btn-secondary">
+                <i class="fas fa-list"></i> Registrations
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="no-events">
+        <i class="fas fa-calendar-times"></i>
+        <h2>No Events Yet</h2>
+        <p>You haven't created any events yet. Start by creating your first event to get started!</p>
+        <a href="{{ url_for('event_manager.create_event') }}" class="create-event-btn">
+          <i class="fas fa-plus"></i> Create Your First Event
+        </a>
+      </div>
+    {% endif %}
+  </main>
+</body>
+</html>

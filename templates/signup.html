@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - CampusConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='futuristic-violet.css') }}" rel="stylesheet">
+    <style>
+        /* Page-Specific Signup Styles */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Unique animated background pattern for signup */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 90% 10%, rgba(255, 0, 255, 0.2) 0%, transparent 40%),
+                radial-gradient(circle at 10% 90%, rgba(0, 255, 255, 0.25) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(139, 44, 247, 0.15) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        /* Header with enhanced glow */
+        .header {
+            background: rgba(10, 0, 21, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(139, 44, 247, 0.3);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), 0 0 60px rgba(139, 44, 247, 0.1);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #ff00ff, #8b2cf7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            text-shadow: 0 0 30px rgba(255, 0, 255, 0.5);
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-link {
+            color: #e9d5ff;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1.25rem;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            background: rgba(255, 0, 255, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.875rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255, 0, 255, 0.3), transparent);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s ease, height 0.5s ease;
+        }
+
+        .nav-link:hover::before {
+            width: 150%;
+            height: 150%;
+        }
+
+        .nav-link:hover {
+            color: #ff00ff;
+            border-color: #ff00ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 0, 255, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .signup-container {
+            background: rgba(29, 0, 82, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 44, 247, 0.3);
+            border-radius: 32px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 550px;
+            box-shadow: 
+                0 25px 60px rgba(0, 0, 0, 0.4),
+                0 0 100px rgba(255, 0, 255, 0.2),
+                inset 0 0 30px rgba(139, 44, 247, 0.05);
+            animation: slideUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .signup-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(60deg, #ff00ff, #00ffff, #8b2cf7, #ff00ff);
+            border-radius: 32px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+            animation: rotate 6s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .signup-container:hover::before {
+            opacity: 0.5;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .signup-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .signup-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            font-family: 'Poppins', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #ffffff, #e9d5ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(255, 0, 255, 0.5);
+        }
+
+        .signup-subtitle {
+            color: #c084fc;
+            font-size: 1rem;
+        }
+
+        .signup-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-5);
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #e9d5ff;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 3.5rem;
+            padding: 0 1.25rem;
+            background: rgba(10, 0, 21, 0.5);
+            border: 1px solid rgba(139, 44, 247, 0.3);
+            border-radius: 16px;
+            color: #ffffff;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            line-height: 1.5;
+        }
+
+        .form-input::placeholder {
+            color: rgba(192, 132, 252, 0.5);
+        }
+
+        .form-select {
+            width: 100%;
+            height: 3.5rem;
+            padding: 0 1.25rem;
+            background: linear-gradient(145deg, rgba(0, 255, 255, 0.1), rgba(29, 0, 82, 0.9));
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 16px;
+            color: #ffffff;
+            font-size: 1rem;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2300ffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 1rem center;
+            background-repeat: no-repeat;
+            background-size: 16px 12px;
+            line-height: 1.5;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-select option {
+            background: linear-gradient(135deg, rgba(10, 0, 21, 0.95), rgba(26, 0, 51, 0.95));
+            color: #ffffff;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .form-select option:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(139, 44, 247, 0.15));
+            color: #00ffff;
+        }
+
+        .form-select option:selected {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(139, 44, 247, 0.2));
+            color: #00ffff;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            background: linear-gradient(145deg, rgba(0, 255, 255, 0.15), rgba(29, 0, 82, 0.95));
+            border-color: #00ffff;
+            box-shadow:
+                0 0 0 3px rgba(0, 255, 255, 0.1),
+                0 0 30px rgba(0, 255, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .form-select:hover {
+            background: linear-gradient(145deg, rgba(0, 255, 255, 0.2), rgba(29, 0, 82, 0.95));
+            border-color: rgba(0, 255, 255, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
+        }
+
+        .password-strength {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #c084fc;
+        }
+
+        .strength-bar {
+            height: 4px;
+            background-color: rgba(139, 44, 247, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 0.25rem;
+        }
+
+        .strength-fill {
+            height: 100%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .strength-weak { background-color: #ff1493; width: 25%; }
+        .strength-fair { background-color: #ffff00; width: 50%; }
+        .strength-good { background-color: #39ff14; width: 75%; }
+        .strength-strong { background-color: #00ffff; width: 100%; }
+
+        .signup-button {
+            background: linear-gradient(135deg, #ff00ff, #cc00cc);
+            color: white;
+            padding: 1rem 2rem;
+            border: 2px solid #ff00ff;
+            border-radius: 24px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: 
+                0 4px 20px rgba(255, 0, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .signup-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .signup-button:hover::before {
+            width: 300%;
+            height: 300%;
+        }
+
+        .signup-button:hover {
+            background: linear-gradient(135deg, #8b2cf7, #6b00d4);
+            border-color: #00ffff;
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 30px rgba(255, 0, 255, 0.6),
+                0 0 60px rgba(255, 0, 255, 0.4);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .signup-button:active {
+            transform: translateY(-1px);
+        }
+
+        .signup-links {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(139, 44, 247, 0.3);
+        }
+
+        .signup-links {
+            color: #c084fc;
+        }
+
+        .signup-links a {
+            color: #00ffff;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .signup-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00ffff, #8b2cf7);
+            transition: width 0.3s ease;
+        }
+
+        .signup-links a:hover::after {
+            width: 100%;
+        }
+
+        .signup-links a:hover {
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(10, 0, 21, 0.95);
+            color: #e9d5ff;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid rgba(139, 44, 247, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            width: 100%;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.875rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-link {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .footer-link:hover {
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .footer-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00ffff, #8b2cf7);
+            transition: width 0.3s ease;
+        }
+
+        .footer-link:hover::after {
+            width: 100%;
+        }
+
+        .role-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-3);
+            margin-top: var(--space-2);
+        }
+
+        .role-card {
+            border: 2px solid rgba(139, 44, 247, 0.3);
+            border-radius: 20px;
+            padding: var(--space-4);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(145deg, rgba(10, 0, 21, 0.8), rgba(26, 0, 51, 0.9));
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .role-card:hover {
+            border-color: rgba(0, 255, 255, 0.5);
+            background: linear-gradient(145deg, rgba(0, 255, 255, 0.1), rgba(29, 0, 82, 0.95));
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.2);
+        }
+
+        .role-card.selected {
+            border-color: rgba(0, 255, 255, 0.7);
+            background: linear-gradient(145deg, rgba(0, 255, 255, 0.15), rgba(29, 0, 82, 1));
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .role-card input[type="radio"] {
+            display: none;
+        }
+
+        .role-icon {
+            font-size: 2rem;
+            margin-bottom: var(--space-2);
+            color: #00ffff;
+            transition: all 0.3s ease;
+        }
+
+        .role-card:hover .role-icon {
+            color: #39ff14;
+            transform: scale(1.1);
+        }
+
+        .role-title {
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: var(--space-1);
+            font-size: 1.1rem;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .role-description {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+        }
+
+        @media (max-width: 480px) {
+            .signup-container {
+                padding: var(--space-6);
+                margin: var(--space-4);
+            }
+
+            .signup-title {
+                font-size: 1.75rem;
+            }
+
+            .role-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <!-- Dark mode removed intentionally -->
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <a href="{{ url_for('index') }}" class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                CampusConnect
+            </a>
+            <nav class="nav-menu">
+                <a href="{{ url_for('index') }}" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    Home
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="nav-link">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Login
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="signup-container">
+        <div class="signup-header">
+            <h1 class="signup-title">Join CampusConnect</h1>
+            <p class="signup-subtitle">Create your account to get started</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' if category == 'warning' else 'times-circle' }}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="signup-form" id="signupForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-input" required placeholder="Enter your username">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-input" required placeholder="Enter your email address">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-input" required placeholder="Create a strong password">
+                <div class="password-strength">
+                    <div class="strength-bar">
+                        <div class="strength-fill" id="strengthFill"></div>
+                    </div>
+                    <span id="strengthText">Enter a password</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Select Your Role</label>
+                <div class="role-cards">
+                    <label class="role-card" for="student">
+                        <input type="radio" id="student" name="role" value="student" checked>
+                        <div class="role-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="role-title">Student</div>
+                        <div class="role-description">Submit assignments and access resources</div>
+                    </label>
+                    <label class="role-card" for="event_manager">
+                        <input type="radio" id="event_manager" name="role" value="event_manager">
+                        <div class="role-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="role-title">Event Manager</div>
+                        <div class="role-description">Create and manage events</div>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="signup-button">
+                <i class="fas fa-user-plus"></i>
+                Create Account
+            </button>
+        </form>
+
+        <div class="signup-links">
+            Already have an account? <a href="{{ url_for('auth.login') }}">Log in here</a>
+        </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="footer-text">&copy; 2024 CampusConnect. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Privacy Policy</a>
+                <a href="#" class="footer-link">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Password strength checker
+        const passwordInput = document.getElementById('password');
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthText = document.getElementById('strengthText');
+        const roleCards = document.querySelectorAll('.role-card');
+        const form = document.getElementById('signupForm');
+
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            let text = '';
+            
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+            strengthFill.className = 'strength-fill';
+            
+            switch (strength) {
+                case 0:
+                case 1:
+                    strengthFill.classList.add('strength-weak');
+                    text = 'Weak password';
+                    break;
+                case 2:
+                case 3:
+                    strengthFill.classList.add('strength-fair');
+                    text = 'Fair password';
+                    break;
+                case 4:
+                    strengthFill.classList.add('strength-good');
+                    text = 'Good password';
+                    break;
+                case 5:
+                    strengthFill.classList.add('strength-strong');
+                    text = 'Strong password';
+                    break;
+            }
+            
+            strengthText.textContent = text;
+        }
+
+        passwordInput.addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+        });
+
+        // Role card selection with enhanced visual feedback
+        roleCards.forEach(card => {
+            card.addEventListener('click', function() {
+                roleCards.forEach(c => {
+                    c.classList.remove('selected');
+                    c.style.transform = 'translateY(0)';
+                    c.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
+                });
+                this.classList.add('selected');
+                this.style.transform = 'translateY(-3px)';
+                this.style.boxShadow = '0 0 30px rgba(0, 255, 255, 0.3)';
+            });
+
+            // Add keyboard support
+            card.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+        });
+
+        // Set initial selected state with animation
+        const initialSelected = document.getElementById('student').closest('.role-card');
+        if (initialSelected) {
+            initialSelected.classList.add('selected');
+            initialSelected.style.transform = 'translateY(-3px)';
+            initialSelected.style.boxShadow = '0 0 30px rgba(0, 255, 255, 0.3)';
+        }
+
+        // Form submission with loading state
+        form.addEventListener('submit', function(e) {
+            const button = form.querySelector('.signup-button');
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+            button.disabled = true;
+        });
+
+        // Input focus effects
+        const inputs = form.querySelectorAll('.form-input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.closest('.form-group').classList.add('focused');
+            });
+
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.closest('.form-group').classList.remove('focused');
+                }
+            });
+            if (input.value) {
+                input.closest('.form-group').classList.add('focused');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{% extends '_base.html' %}
+
+{% block title %}404 · Page Not Found · CampusConnect{% endblock %}
+
+{% block content %}
+  <header class="header header--brand" role="banner">
+    <h1 class="header-title"><i class="fas fa-search"></i> Page Not Found</h1>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="{{ url_for('index') }}">Home</a>
+      <a href="{{ url_for('auth.login') }}">Login</a>
+      <a href="{{ url_for('auth.signup') }}">Sign Up</a>
+    </nav>
+  </header>
+
+  <main class="container" role="main">
+    <section class="card text-center">
+      <div class="card-header">
+        <h2 class="card-title">404 — Page Not Found</h2>
+      </div>
+      <div class="space-y-4">
+        <p class="text-slate-600">The page you're looking for doesn't exist or has been moved.</p>
+        <div class="flex items-center justify-center gap-3">
+          <a href="{{ url_for('index') }}" class="btn btn-primary"><i class="fas fa-home"></i> Go Home</a>
+          <a href="javascript:history.back()" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Go Back</a>
+        </div>
+      </div>
+    </section>
+  </main>
+{% endblock %}

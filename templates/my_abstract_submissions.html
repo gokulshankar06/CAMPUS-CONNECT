@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}My Abstract Submissions{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="header-section mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="dashboard-title">
+                            <i class="fas fa-file-alt me-2"></i>
+                            My Abstract Submissions
+                        </h1>
+                        <p class="text-muted">Manage and track your abstract submissions</p>
+                    </div>
+                    <a href="{{ url_for('events.browse_events') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Browse Events
+                    </a>
+                </div>
+            </div>
+
+            <!-- Submissions List -->
+            {% if submissions %}
+            <div class="row">
+                {% for submission in submissions %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 submission-card">
+                        <div class="card-header">
+                            <h6 class="mb-0 text-truncate" title="{{ submission.title }}">
+                                {{ submission.title }}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                <strong>Event:</strong> {{ submission.event_title }}
+                            </p>
+                            
+                            <p class="mb-2">
+                                <i class="fas fa-tag me-1"></i>
+                                <strong>Type:</strong> {{ submission.event_type|title }}
+                            </p>
+
+                            {% if submission.team_name %}
+                            <p class="mb-2">
+                                <i class="fas fa-users me-1"></i>
+                                <strong>Team:</strong> {{ submission.team_name }}
+                            </p>
+                            {% endif %}
+
+                            <p class="mb-2">
+                                <strong>Status:</strong>
+                                {% if submission.status == 'draft' %}
+                                    <span class="badge bg-secondary">Draft</span>
+                                {% elif submission.status == 'submitted' %}
+                                    <span class="badge bg-primary">Submitted</span>
+                                {% elif submission.status == 'plagiarism_check' %}
+                                    <span class="badge bg-warning">Plagiarism Check</span>
+                                {% elif submission.status == 'pending_review' %}
+                                    <span class="badge bg-info">Pending Review</span>
+                                {% elif submission.status == 'revision_required' %}
+                                    <span class="badge bg-warning">Revision Required</span>
+                                {% elif submission.status == 'approved' %}
+                                    <span class="badge bg-success">Approved</span>
+                                {% elif submission.status == 'auto_approved' %}
+                                    <span class="badge bg-success">Auto-Approved</span>
+                                {% elif submission.status == 'rejected' %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ submission.status|title }}</span>
+                                {% endif %}
+                            </p>
+
+                            {% if submission.plagiarism_score %}
+                            <p class="mb-2">
+                                <strong>Plagiarism Score:</strong>
+                                {% if submission.plagiarism_score < 10 %}
+                                    <span class="text-success">{{ submission.plagiarism_score }}%</span>
+                                {% elif submission.plagiarism_score < 25 %}
+                                    <span class="text-warning">{{ submission.plagiarism_score }}%</span>
+                                {% else %}
+                                    <span class="text-danger">{{ submission.plagiarism_score }}%</span>
+                                {% endif %}
+                            </p>
+                            {% endif %}
+
+                            <p class="mb-2 text-muted small">
+                                <i class="fas fa-clock me-1"></i>
+                                {% if submission.submitted_at %}
+                                    Submitted: {{ submission.submitted_at }}
+                                {% else %}
+                                    Created: {{ submission.created_at }}
+                                {% endif %}
+                            </p>
+
+                            {% if submission.feedback %}
+                            <div class="alert alert-info p-2 small">
+                                <i class="fas fa-comment-alt me-1"></i>
+                                Reviewer feedback available
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ url_for('abstracts.view_submission', submission_id=submission.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </a>
+                                
+                                {% if submission.status == 'draft' or submission.status == 'revision_required' %}
+                                <a href="{{ url_for('abstracts.submit_abstract', event_id=submission.event_id) }}" 
+                                   class="btn btn-sm btn-outline-warning">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </a>
+                                {% endif %}
+                                
+                                {% if submission.status == 'draft' %}
+                                <form method="POST" 
+                                      action="{{ url_for('abstracts.finalize_submission', submission_id=submission.id) }}" 
+                                      style="display: inline;">
+                                    <button type="submit" class="btn btn-sm btn-outline-success"
+                                            onclick="return confirm('Finalize this submission? You won\'t be able to edit after finalizing.')">
+                                        <i class="fas fa-check me-1"></i>Finalize
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- No Submissions -->
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                    <h4>No Abstract Submissions Yet</h4>
+                    <p class="text-muted">You haven't submitted any abstracts for events.</p>
+                    <a href="{{ url_for('events.browse_events') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-search me-1"></i>Browse Events to Submit Abstract
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Statistics Summary (if there are submissions) -->
+            {% if submissions %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Submission Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h3 class="text-primary">{{ submissions|length }}</h3>
+                            <p class="text-muted">Total Submissions</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-success">
+                                {{ submissions|selectattr('status', 'equalto', 'approved')|list|length + 
+                                   submissions|selectattr('status', 'equalto', 'auto_approved')|list|length }}
+                            </h3>
+                            <p class="text-muted">Approved</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-warning">
+                                {{ submissions|selectattr('status', 'in', ['draft', 'revision_required'])|list|length }}
+                            </h3>
+                            <p class="text-muted">Need Action</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-info">
+                                {{ submissions|selectattr('status', 'in', ['submitted', 'pending_review', 'plagiarism_check'])|list|length }}
+                            </h3>
+                            <p class="text-muted">Under Review</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.header-section {
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.submission-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.submission-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.submission-card .card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.submission-card .card-footer {
+    border-top: 1px solid #e9ecef;
+}
+
+.badge {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.85rem;
+}
+
+.text-truncate {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+</style>
+
+{% endblock %}

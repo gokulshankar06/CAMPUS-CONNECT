@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Management - CampusConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='futuristic-violet.css') }}" rel="stylesheet">
+    <style>
+    </style>
+</head>
+<body>
+  <header class="header" role="banner">
+    <div class="header__inner">
+      <a class="brand" href="{{ url_for('main.dashboard') }}">
+        <i class="fas fa-graduation-cap"></i>
+        CampusConnect
+      </a>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="{{ url_for('faculty.faculty_assignments') }}"><i class="fas fa-tasks"></i> My Assignments</a>
+        <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="container">
+      <h1 class="header-title"><i class="fas fa-users"></i> Student Management</h1>
+      <p class="subtitle">Students interacting with your assignments</p>
+      
+      <div class="card">
+        <div class="card__header">
+          <h2 class="card__title">Student Activity</h2>
+          <p class="card__subtitle">List of students and their submission activity for your assignments</p>
+        </div>
+        
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Email</th>
+                <th>Submissions</th>
+                <th>Graded</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if not students %}
+                <tr>
+                  <td colspan="4" class="text-center text-muted">No students found.</td>
+                </tr>
+              {% else %}
+                {% for s in students %}
+                  <tr>
+                    <td>
+                      <div class="font-semibold">{{ s['username'] }}</div>
+                      <div class="text-sm text-muted">ID: {{ s['id'] }}</div>
+                    </td>
+                    <td>{{ s['email'] }}</td>
+                    <td class="text-violet">{{ s['submissions_count'] or 0 }}</td>
+                    <td class="text-success">{{ s['graded_count'] or 0 }}</td>
+                  </tr>
+                {% endfor %}
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}Abstract Submission - {{ submission.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="header-section mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="dashboard-title">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Abstract Submission Details
+                        </h1>
+                        <p class="text-muted">{{ submission.event_title }} - {{ submission.event_type|title }}</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('abstracts.my_submissions') }}" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-list me-1"></i>My Submissions
+                        </a>
+                        <a href="{{ url_for('events.event_details', event_id=submission.event_id) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Event
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submission Status Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Submission Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Status:</strong> 
+                                {% if submission.status == 'draft' %}
+                                    <span class="badge bg-secondary">{{ submission.status|title }}</span>
+                                {% elif submission.status == 'submitted' %}
+                                    <span class="badge bg-primary">{{ submission.status|title }}</span>
+                                {% elif submission.status == 'plagiarism_check' %}
+                                    <span class="badge bg-warning">Plagiarism Check</span>
+                                {% elif submission.status == 'pending_review' %}
+                                    <span class="badge bg-info">Pending Review</span>
+                                {% elif submission.status == 'revision_required' %}
+                                    <span class="badge bg-warning">Revision Required</span>
+                                {% elif submission.status == 'approved' or submission.status == 'auto_approved' %}
+                                    <span class="badge bg-success">{{ submission.status|replace('_', ' ')|title }}</span>
+                                {% elif submission.status == 'rejected' %}
+                                    <span class="badge bg-danger">{{ submission.status|title }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ submission.status|title }}</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Submission ID:</strong> #{{ submission.id }}</p>
+                            <p><strong>Submitted By:</strong> {{ submission.submitted_by }}</p>
+                            {% if submission.team_name %}
+                            <p><strong>Team:</strong> {{ submission.team_name }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Created At:</strong> {{ submission.created_at }}</p>
+                            {% if submission.submitted_at %}
+                            <p><strong>Submitted At:</strong> {{ submission.submitted_at }}</p>
+                            {% endif %}
+                            {% if submission.reviewed_at %}
+                            <p><strong>Reviewed At:</strong> {{ submission.reviewed_at }}</p>
+                            <p><strong>Reviewed By:</strong> {{ submission.reviewed_by_name }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if submission.plagiarism_score is not none %}
+                    {% set plagiarism_percent = (submission.plagiarism_score * 100)|round(1) %}
+                    <div class="mt-3">
+                        <h6>Plagiarism Check Results:</h6>
+                        <div class="progress" style="height: 25px;">
+                            {% if plagiarism_percent < 50 %}
+                                {% set color = 'success' %}
+                            {% elif plagiarism_percent < 80 %}
+                                {% set color = 'warning' %}
+                            {% else %}
+                                {% set color = 'danger' %}
+                            {% endif %}
+                            <div class="progress-bar bg-{{ color }}" role="progressbar" 
+                                 style="width: {{ plagiarism_percent }}%"
+                                 aria-valuenow="{{ plagiarism_percent }}" 
+                                 aria-valuemin="0" aria-valuemax="100">
+                                {{ plagiarism_percent }}% Similarity
+                            </div>
+                        </div>
+                        <p class="mt-2">
+                            <strong>Status:</strong> 
+                            {% if submission.plagiarism_status == 'clean' %}
+                                <span class="badge bg-success">Clean</span>
+                            {% elif submission.plagiarism_status == 'flagged' %}
+                                <span class="badge bg-warning">Flagged for Review</span>
+                            {% elif submission.plagiarism_status == 'suspicious' %}
+                                <span class="badge bg-danger">Suspicious</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ submission.plagiarism_status|title }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Abstract Content -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-file-text me-2"></i>Abstract Content</h5>
+                </div>
+                <div class="card-body">
+                    <h4>{{ submission.title }}</h4>
+                    <div class="abstract-text p-3 bg-light rounded mt-3">
+                        <p style="white-space: pre-wrap;">{{ submission.abstract_text }}</p>
+                    </div>
+                    <div class="mt-3">
+                        <p><strong>Word Count:</strong> {{ submission.word_count }}</p>
+                        <p><strong>Keywords:</strong> 
+                            {% if submission.keywords %}
+                                {% for keyword in submission.keywords.split(',') %}
+                                <span class="badge bg-secondary me-1">{{ keyword.strip() }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted">No keywords specified</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    {% if submission.file_path %}
+                    <div class="mt-3">
+                        <p><strong>Attached File:</strong> 
+                            <a href="{{ url_for('static', filename=submission.file_path|replace('static/','', 1)) }}" 
+                               class="btn btn-sm btn-outline-primary" target="_blank">
+                                <i class="fas fa-download me-1"></i>Download Attachment
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Feedback Section -->
+            {% if submission.feedback %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-comments me-2"></i>Reviewer Feedback</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <p style="white-space: pre-wrap;">{{ submission.feedback }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Submission History -->
+            {% if history and history|length > 0 %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Submission History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Version</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                    <th>Word Count</th>
+                                    <th>Modified At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for version in history %}
+                                <tr>
+                                    <td>v{{ version.version }}</td>
+                                    <td>
+                                        {% if version.status == 'draft' %}
+                                            <span class="badge bg-secondary">Draft</span>
+                                        {% elif version.status == 'submitted' %}
+                                            <span class="badge bg-primary">Submitted</span>
+                                        {% else %}
+                                            <span class="badge bg-info">{{ version.status|title }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ version.action }}</td>
+                                    <td>{{ version.word_count }}</td>
+                                    <td>{{ version.modified_at }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-info" 
+                                                onclick="viewVersion({{ version.id }})">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            {% if submission.status == 'draft' or submission.status == 'revision_required' %}
+                            <a href="{{ url_for('abstracts.submit_abstract', event_id=submission.event_id) }}" 
+                               class="btn btn-primary">
+                                <i class="fas fa-edit me-1"></i>Edit Submission
+                            </a>
+                            {% endif %}
+                            
+                            {% if submission.status == 'draft' %}
+                            <form method="POST" action="{{ url_for('abstracts.finalize_submission', submission_id=submission.id) }}" 
+                                  style="display: inline;">
+                                <button type="submit" class="btn btn-success" 
+                                        onclick="return confirm('Are you sure you want to finalize this submission? You will not be able to make changes after finalizing.')">
+                                    <i class="fas fa-check me-1"></i>Finalize Submission
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            {% if current_user.role == 'event_manager' and submission.status in ['submitted', 'pending_review', 'plagiarism_check'] %}
+                            <a href="{{ url_for('event_manager.review_abstract', submission_id=submission.id) }}" 
+                               class="btn btn-warning">
+                                <i class="fas fa-gavel me-1"></i>Review Abstract
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Version View Modal -->
+<div class="modal fade" id="versionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Version History Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="versionContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewVersion(versionId) {
+    // Placeholder for viewing specific version
+    // You can implement AJAX call to fetch version details
+    alert('Viewing version ' + versionId + ' (Feature coming soon)');
+}
+
+// Add Bootstrap if not already included
+if (typeof bootstrap === 'undefined') {
+    var script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';
+    document.head.appendChild(script);
+}
+</script>
+
+<style>
+.abstract-text {
+    font-family: 'Georgia', serif;
+    line-height: 1.8;
+    font-size: 1.05rem;
+}
+
+.header-section {
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 1rem;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.badge {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.9rem;
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,247 @@
+/* CampusConnect Theme: tokens, components, and dark mode */
+
+/* 1) Design Tokens (CSS variables) */
+:root,
+:root[data-theme='violet-light'] {
+  /* Palette */
+  --primary-50: #eff6ff;
+  --primary-100: #dbeafe;
+  --primary-200: #bfdbfe;
+  --primary-300: #93c5fd;
+  --primary-400: #60a5fa;
+  --primary-500: #3b82f6;
+  --primary-600: #2563eb;
+  --primary-700: #1d4ed8;
+  --primary-800: #1e40af;
+  --primary-900: #1e3a8a;
+
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  --emerald-600: #059669;
+  --amber-600: #d97706;
+  --red-600: #dc2626;
+
+  /* Surfaces & content */
+  --body-bg: var(--gray-50);
+  --body-fg: var(--gray-900);
+  --card-bg: #ffffff;
+  --card-fg: var(--gray-900);
+  --card-border: var(--gray-200);
+  --muted-color: var(--gray-600);
+  --divider: var(--gray-300);
+  --heading-color: var(--gray-900);
+
+  /* Radii & shadow */
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,.12);
+  --shadow-xl: 0 18px 40px rgba(0,0,0,.18);
+}
+
+:root[data-theme='violet-dark'] {
+  --body-bg: #0f172a;  /* slate-900 */
+  --body-fg: #e5e7eb;  /* slate-200 */
+  --card-bg: #111827;  /* slate-900-ish */
+  --card-fg: #e5e7eb;
+  --card-border: #374151; /* slate-700 */
+  --muted-color: #9ca3af; /* slate-400 */
+  --divider: #4b5563;     /* slate-600 */
+  --heading-color: #ffffff;
+}
+
+/* 2) Base */
+html, body { height: 100%; }
+body {
+  background: var(--body-bg);
+  color: var(--body-fg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+}
+
+img { max-width: 100%; height: auto; }
+
+/* 3) Layout helpers */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+/* 4) Header and nav */
+.header {
+  background: linear-gradient(135deg, var(--primary-800), var(--primary-700));
+  color: #fff;
+  padding: 1.25rem 0;
+  box-shadow: var(--shadow-lg);
+}
+.header--brand {
+  background: linear-gradient(135deg, var(--primary-700), var(--primary-800));
+}
+.header .header-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,.3);
+  text-align: center;
+  margin: 0 0 .5rem 0;
+}
+.nav {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+.nav a {
+  color: rgba(255,255,255,0.95);
+  text-decoration: none;
+  font-weight: 600;
+  padding: .4rem .8rem;
+  border-radius: 10px;
+  transition: background .2s ease, color .2s ease;
+}
+.nav a:hover { background: rgba(255,255,255,.15); color: #fff; }
+
+/* 5) Card */
+.card {
+  background: var(--card-bg);
+  color: var(--card-fg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-md);
+}
+.card-header {
+  margin-bottom: .75rem;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: .5rem;
+}
+.card-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--heading-color);
+}
+.card-description { color: var(--muted-color); }
+
+/* 6) Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .6rem 1rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn:active { transform: translateY(0); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+  color: #fff;
+  border-color: var(--primary-600);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--primary-700), var(--primary-800));
+}
+
+.btn-secondary {
+  background: #fff;
+  color: var(--primary-800);
+  border-color: var(--card-border);
+}
+:root[data-theme='violet-dark'] .btn-secondary {
+  background: var(--card-bg);
+  color: #e5e7eb;
+  border-color: var(--card-border);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  border-color: #059669;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  border-color: #dc2626;
+}
+
+/* 7) Alerts */
+.alert { padding: 1rem; border-radius: 12px; border: 1px solid; }
+.alert-success { background: #d1fae5; border-color: #a7f3d0; color: #065f46; }
+.alert-danger  { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+.alert-warning { background: #fef3c7; border-color: #fcd34d; color: #92400e; }
+
+:root[data-theme='violet-dark'] .alert-success { background: rgba(16,185,129,0.15); border-color: #10b981; color: #a7f3d0; }
+:root[data-theme='violet-dark'] .alert-danger  { background: rgba(239,68,68,0.15);  border-color: #ef4444; color: #fecaca; }
+:root[data-theme='violet-dark'] .alert-warning { background: rgba(245,158,11,0.15); border-color: #f59e0b; color: #fde68a; }
+
+/* 8) Forms */
+label { font-weight: 600; color: var(--heading-color); }
+.form-input,
+.form-select,
+.form-textarea,
+.file-input {
+  width: 100%;
+  border: 2px solid var(--card-border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--card-fg);
+  padding: .75rem .9rem;
+}
+.form-textarea { min-height: 180px; resize: vertical; }
+:root[data-theme='violet-dark'] .form-input,
+:root[data-theme='violet-dark'] .form-select,
+:root[data-theme='violet-dark'] .form-textarea,
+:root[data-theme='violet-dark'] .file-input {
+  background: #0b1220;
+  color: #e5e7eb;
+  border-color: #334155;
+}
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus,
+.file-input:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.2);
+}
+
+/* 9) Utilities */
+.muted { color: var(--muted-color); }
+.divider { border-top: 1px solid var(--divider); }
+.text-center { text-align: center; }
+
+/* 10) Header/footer helpers to harmonize pages that include their own header/footer */
+.footer {
+  background: #1f2937;
+  color: #fff;
+  border-top: 1px solid #374151;
+}
+:root[data-theme='violet-dark'] .footer {
+  background: #0b1220;
+  border-top-color: #334155;
+}

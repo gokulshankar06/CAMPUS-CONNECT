@@ -1,0 +1,64 @@
+{% extends '_base.html' %}
+
+{% block title %}Student Dashboard · CampusConnect{% endblock %}
+
+{% block content %}
+  <header class="header header--brand" role="banner">
+    <h1 class="header-title">
+      <i class="fas fa-graduation-cap"></i>
+      Student Dashboard
+    </h1>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="{{ url_for('student.student_assignments') }}"><i class="fas fa-tasks"></i> My Assignments</a>
+      <a href="{{ url_for('chatbot') }}"><i class="fas fa-robot"></i> AI Assistant</a>
+      <a href="{{ url_for('auth.logout') }}" class="text-red-600"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+  </header>
+
+  <main class="container" role="main">
+    <section class="card text-center">
+      <h2 class="text-3xl font-bold mb-2">Welcome back, {{ user.username }}!</h2>
+      <p class="text-lg mb-6">Ready to tackle your assignments and continue learning?</p>
+      <span class="badge badge-primary"><i class="fas fa-user-graduate"></i>&nbsp; Student</span>
+    </section>
+
+    <section class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;">
+      <div class="card text-center">
+        <div class="text-3xl font-bold" style="color:var(--primary-600);">{{ assignments_count or 0 }}</div>
+        <div class="text-sm text-gray-500">Total Assignments</div>
+      </div>
+      <div class="card text-center">
+        <div class="text-3xl font-bold" style="color:var(--primary-600);">{{ pending_assignments or 0 }}</div>
+        <div class="text-sm text-gray-500">Pending</div>
+      </div>
+      <div class="card text-center">
+        <div class="text-3xl font-bold" style="color:var(--primary-600);">{{ completed_assignments or 0 }}</div>
+        <div class="text-sm text-gray-500">Completed</div>
+      </div>
+      <div class="card text-center">
+        <div class="text-3xl font-bold" style="color:var(--primary-600);">{{ grade_average or 'N/A' }}</div>
+        <div class="text-sm text-gray-500">Average Grade</div>
+      </div>
+    </section>
+
+    <section class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;">
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">My Assignments</h3></div>
+        <p class="card-description">View all your assignments, track deadlines, and submit your work. Stay organized and never miss a due date.</p>
+        <a href="{{ url_for('student.student_assignments') }}" class="btn btn-primary"><i class="fas fa-arrow-right"></i> View Assignments</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">AI Study Assistant</h3></div>
+        <p class="card-description">Get instant help with your studies. Ask questions, get explanations, and receive personalized learning support.</p>
+        <a href="{{ url_for('chatbot') }}" class="btn btn-primary"><i class="fas fa-comments"></i> Start Chat</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">Progress Tracking</h3></div>
+        <p class="card-description">Monitor your academic progress, view grades, and track your improvement over time.</p>
+        <a href="{{ url_for('student.progress') }}" class="btn btn-primary"><i class="fas fa-chart-bar"></i> View Progress</a>
+      </div>
+    </section>
+  </main>
+  {% endblock %}

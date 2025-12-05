@@ -1,0 +1,486 @@
+{% extends '_base.html' %}
+
+{% block title %}Sign Up - CampusConnect{% endblock %}
+
+{% block head_extra %}
+<style>
+    :root {
+        --header-height: 80px;
+        --footer-height: 60px;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        line-height: 1.6;
+    }
+
+    /* Professional Header */
+    .header {
+        background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+        color: white;
+        height: var(--header-height);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .header-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-decoration: none;
+        color: white;
+    }
+
+    .nav-menu {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .nav-link {
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .nav-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    /* Main Content */
+    .main-content {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-4);
+    }
+
+    .signup-container {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-xl);
+        padding: var(--space-10);
+        width: 100%;
+        max-width: 500px;
+        border: 1px solid var(--gray-200);
+    }
+
+    .signup-header {
+        text-align: center;
+        margin-bottom: var(--space-8);
+    }
+
+    .signup-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: var(--space-2);
+        background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .signup-subtitle {
+        color: var(--gray-600);
+        font-size: 1rem;
+    }
+
+    .signup-form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-5);
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: var(--space-2);
+        font-weight: 600;
+        color: var(--gray-700);
+        font-size: 0.875rem;
+    }
+
+    .form-input {
+        width: 100%;
+        height: 3.5rem;
+        padding: 0 var(--space-4);
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background-color: white;
+        line-height: 1.5;
+    }
+
+    .form-select {
+        width: 100%;
+        height: 3.5rem;
+        padding: 0 var(--space-4);
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background-color: white;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right var(--space-3) center;
+        background-repeat: no-repeat;
+        background-size: 16px 12px;
+        line-height: 1.5;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+        color: var(--primary-500);
+    }
+
+    .password-strength {
+        margin-top: var(--space-2);
+        font-size: 0.75rem;
+    }
+
+    .strength-bar {
+        height: 4px;
+        background-color: var(--gray-200);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: var(--space-1);
+    }
+
+    .strength-fill {
+        height: 100%;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .strength-weak { background-color: var(--danger-500); width: 25%; }
+    .strength-fair { background-color: var(--warning-500); width: 50%; }
+    .strength-good { background-color: var(--success-500); width: 75%; }
+    .strength-strong { background-color: var(--success-600); width: 100%; }
+
+    .signup-button {
+        background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+        color: white;
+        padding: var(--space-4);
+        border: none;
+        border-radius: var(--radius-lg);
+        font-size: 1.125rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        margin-top: var(--space-2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+    }
+
+    .signup-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.6s;
+    }
+
+    .signup-button:hover::before { left: 100%; }
+    .signup-button:hover {
+        background: linear-gradient(135deg, var(--primary-700), var(--primary-800));
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    .signup-button:active { transform: translateY(0); }
+
+    .signup-links {
+        text-align: center;
+        margin-top: var(--space-6);
+        padding-top: var(--space-6);
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .signup-links a { color: var(--primary-600); text-decoration: none; font-weight: 600; transition: color 0.3s ease; }
+    .signup-links a:hover { color: var(--primary-800); }
+
+    /* Footer */
+    .footer { background: #1f2937; color: white; height: var(--footer-height); display: flex; align-items: center; justify-content: center; border-top: 1px solid #374151; }
+    .footer-content { max-width: 1400px; width: 100%; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .footer-text { color: #9ca3af; font-size: 0.875rem; }
+    .footer-links { display: flex; gap: 2rem; }
+    .footer-link { color: #9ca3af; text-decoration: none; font-size: 0.875rem; transition: color 0.2s ease; }
+    .footer-link:hover { color: white; }
+
+    .role-cards { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-top: var(--space-2); }
+    .role-card { border: 2px solid var(--gray-200); border-radius: var(--radius-lg); padding: var(--space-4); text-align: center; cursor: pointer; transition: all 0.3s ease; background: white; }
+    .role-card:hover { border-color: var(--primary-300); background-color: var(--primary-50); }
+    .role-card.selected { border-color: var(--primary-500); background-color: var(--primary-50); }
+    .role-card input[type="radio"] { display: none; }
+    .role-icon { font-size: 1.5rem; margin-bottom: var(--space-2); color: var(--primary-600); }
+    .role-title { font-weight: 600; color: var(--gray-800); margin-bottom: var(--space-1); }
+    .role-description { font-size: 0.75rem; color: var(--gray-500); }
+
+    @media (max-width: 480px) {
+        .signup-container { padding: var(--space-6); margin: var(--space-4); }
+        .signup-title { font-size: 1.75rem; }
+        .role-cards { grid-template-columns: 1fr; }
+    }
+</style>
+<style>
+    /* Dark mode accessibility */
+    @media (prefers-color-scheme: dark) {
+        body { background: linear-gradient(135deg, #0b1220, #0f172a); color: #e5e7eb; }
+        .header { background: linear-gradient(135deg, #1e3a8a, #1d4ed8); }
+        .signup-container { background: #111827; border-color: #374151; }
+        .signup-title { -webkit-text-fill-color: initial; color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,.3); }
+        .signup-subtitle { color: #9ca3af; }
+        .form-group label { color: #cbd5e1; }
+        .form-input, .form-select { background: #0b1220; color: #e5e7eb; border-color: #334155; }
+        .form-input:focus, .form-select:focus { border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(59,130,246,.25); color: #e5e7eb; }
+        .role-card { background: #0b1220; border-color: #334155; }
+        .role-card:hover { border-color: #60a5fa; background-color: rgba(59,130,246,0.08); }
+        .role-card.selected { border-color: #60a5fa; background-color: rgba(59,130,246,0.08); }
+        .role-title { color: #e5e7eb; }
+        .role-description { color: #9ca3af; }
+        .signup-links { border-top-color: #334155; }
+        .footer { background: #0b1220; border-top-color: #334155; }
+        .footer-text, .footer-link { color: #94a3b8; }
+        .footer-link:hover { color: #ffffff; }
+        .alert.alert-success { background: rgba(16,185,129,0.15); color: #a7f3d0; border: 1px solid #10b981; }
+        .alert.alert-danger { background: rgba(239,68,68,0.15); color: #fecaca; border: 1px solid #ef4444; }
+        .alert.alert-warning { background: rgba(245,158,11,0.15); color: #fde68a; border: 1px solid #f59e0b; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<header class="header">
+    <div class="header-container">
+        <a href="{{ url_for('index') }}" class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            CampusConnect
+        </a>
+        <nav class="nav-menu">
+            <a href="{{ url_for('index') }}" class="nav-link">
+                <i class="fas fa-home"></i>
+                Home
+            </a>
+            <a href="{{ url_for('auth.login') }}" class="nav-link">
+                <i class="fas fa-sign-in-alt"></i>
+                Login
+            </a>
+        </nav>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="signup-container">
+        <div class="signup-header">
+            <h1 class="signup-title">Join CampusConnect</h1>
+            <p class="signup-subtitle">Create your account to get started</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' if category == 'warning' else 'times-circle' }}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="signup-form" id="signupForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-input" required placeholder="Enter your username">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-input" required placeholder="Enter your email address">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-input" required placeholder="Create a strong password">
+                <div class="password-strength">
+                    <div class="strength-bar">
+                        <div class="strength-fill" id="strengthFill"></div>
+                    </div>
+                    <span id="strengthText">Enter a password</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Select Your Role</label>
+                <div class="role-cards">
+                    <label class="role-card" for="student">
+                        <input type="radio" id="student" name="role" value="student" checked>
+                        <div class="role-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="role-title">Student</div>
+                        <div class="role-description">Submit assignments and access resources</div>
+                    </label>
+                    <label class="role-card" for="faculty">
+                        <input type="radio" id="faculty" name="role" value="faculty">
+                        <div class="role-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="role-title">Faculty</div>
+                        <div class="role-description">Create assignments and manage students</div>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="signup-button">
+                <i class="fas fa-user-plus"></i>
+                Create Account
+            </button>
+        </form>
+
+        <div class="signup-links">
+            Already have an account? <a href="{{ url_for('auth.login') }}">Log in here</a>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="footer-content">
+        <p class="footer-text">&copy; 2025 CampusConnect. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="#" class="footer-link">Privacy Policy</a>
+            <a href="#" class="footer-link">Terms of Service</a>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+    // Password strength checker
+    const passwordInput = document.getElementById('password');
+    const strengthFill = document.getElementById('strengthFill');
+    const strengthText = document.getElementById('strengthText');
+    const roleCards = document.querySelectorAll('.role-card');
+    const form = document.getElementById('signupForm');
+
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        let text = '';
+        if (password.length >= 8) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+        strengthFill.className = 'strength-fill';
+        switch (strength) {
+            case 0:
+            case 1:
+                strengthFill.classList.add('strength-weak');
+                text = 'Weak password';
+                break;
+            case 2:
+            case 3:
+                strengthFill.classList.add('strength-fair');
+                text = 'Fair password';
+                break;
+            case 4:
+                strengthFill.classList.add('strength-good');
+                text = 'Good password';
+                break;
+            case 5:
+                strengthFill.classList.add('strength-strong');
+                text = 'Strong password';
+                break;
+        }
+        strengthText.textContent = text;
+    }
+
+    passwordInput.addEventListener('input', function() {
+        checkPasswordStrength(this.value);
+    });
+
+    // Role card selection
+    roleCards.forEach(card => {
+        card.addEventListener('click', function() {
+            roleCards.forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+        });
+    });
+
+    // Set initial selected state
+    document.getElementById('student').closest('.role-card').classList.add('selected');
+
+    // Form submission with loading state
+    form.addEventListener('submit', function(e) {
+        const button = form.querySelector('.signup-button');
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+        button.disabled = true;
+    });
+
+    // Input focus effects
+    const inputs = form.querySelectorAll('.form-input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.closest('.form-group').classList.add('focused');
+        });
+        input.addEventListener('blur', function() {
+            if (!this.value) {
+                this.closest('.form-group').classList.remove('focused');
+            }
+        });
+        if (input.value) {
+            input.closest('.form-group').classList.add('focused');
+        }
+    });
+</script>
+{% endblock %}

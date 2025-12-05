@@ -1,0 +1,132 @@
+{% extends '_base.html' %}
+
+{% block title %}Submit Assignment · CampusConnect{% endblock %}
+
+{% block head_extra %}
+<style>
+  .form-split {
+    display: grid;
+    grid-template-columns: 1fr minmax(48px, 80px) 1fr;
+    gap: var(--space-8);
+    align-items: start;
+  }
+  .v-divider {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted-color);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: .08em;
+  }
+  .v-divider::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--divider);
+  }
+  .v-divider span {
+    position: relative;
+    z-index: 1;
+    background: var(--card-bg);
+    color: var(--muted-color);
+    padding: .5rem .75rem;
+    border-radius: 999px;
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow-sm);
+  }
+  @media (max-width: 768px) {
+    .form-split { grid-template-columns: 1fr; gap: var(--space-6); }
+    .v-divider { display: none; }
+  }
+  .file-hint { color: var(--muted-color); font-size: .875rem; margin-top: .5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+  <header class="header header--brand" role="banner">
+    <h1 class="header-title"><i class="fas fa-file-upload"></i> Submit Assignment</h1>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('student.student_assignments') }}">Assignments</a>
+      <a href="{{ url_for('chatbot') }}">AI Assistant</a>
+      <a href="{{ url_for('auth.logout') }}">Logout</a>
+    </nav>
+  </header>
+
+  <main role="main">
+    <div class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+              <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' if category == 'warning' else 'times-circle' }}"></i>
+              <span><strong>{{ category.capitalize() }}:</strong> {{ message }}</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <section class="card mi-elevate">
+        <header class="card-header">
+          <h2 class="card-title">
+            <i class="fas fa-file-alt"></i>
+            {{ assignment.title }}
+          </h2>
+          <p class="card-description">{{ assignment.description }}</p>
+        </header>
+
+        <form method="POST" enctype="multipart/form-data">
+          <div class="form-split">
+            <div>
+              <div class="form-group">
+                <label for="submission_text">
+                  <i class="fas fa-edit"></i> Written Submission
+                </label>
+                <textarea
+                  id="submission_text"
+                  name="submission_text"
+                  class="form-textarea"
+                  placeholder="Type your assignment submission here. You can include your analysis, answers, explanations, or any written content required for this assignment..."></textarea>
+              </div>
+            </div>
+
+            <div class="v-divider" aria-hidden="true"><span>OR</span></div>
+
+            <div>
+              <div class="form-group">
+                <label for="submission_file">
+                  <i class="fas fa-cloud-upload-alt"></i> File Upload
+                </label>
+                <input
+                  type="file"
+                  id="submission_file"
+                  name="submission_file"
+                  class="file-input"
+                  accept=".docx,.pdf,.txt,.doc,.rtf" />
+                <p class="file-hint">Supported formats: PDF, Word Document, Text File (Max 10MB)</p>
+              </div>
+            </div>
+          </div>
+
+          {% if existing_submission %}
+            <div class="alert alert-warning" role="alert">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span><strong>Notice:</strong> You have an existing submission. Submitting again will replace your previous work.</span>
+            </div>
+          {% endif %}
+
+          <button type="submit" class="btn btn-primary btn-lg w-full mi-press">
+            <i class="fas fa-paper-plane"></i>
+            Submit Assignment
+          </button>
+        </form>
+      </section>
+    </div>
+  </main>
+{% endblock %}

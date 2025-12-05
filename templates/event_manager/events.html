@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Events - CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Manage Events</h1>
+        <a href="{{ url_for('event_manager.create_event') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Create New Event
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Status</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="all" {% if request.args.get('status') == 'all' %}selected{% endif %}>All Events</option>
+                        <option value="upcoming" {% if request.args.get('status') == 'upcoming' or not request.args.get('status') %}selected{% endif %}>Upcoming</option>
+                        <option value="ongoing" {% if request.args.get('status') == 'ongoing' %}selected{% endif %}>Ongoing</option>
+                        <option value="past" {% if request.args.get('status') == 'past' %}selected{% endif %}>Past</option>
+                        <option value="draft" {% if request.args.get('status') == 'draft' %}selected{% endif %}>Drafts</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="event_type" class="form-label">Event Type</label>
+                    <select name="event_type" id="event_type" class="form-select">
+                        <option value="">All Types</option>
+                        {% for type in event_types %}
+                            <option value="{{ type }}" {% if request.args.get('event_type') == type %}selected{% endif %}>
+                                {{ type|replace('_', ' ')|title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-funnel"></i> Filter
+                    </button>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <a href="{{ url_for('event_manager.events') }}" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-primary border-4 h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Events</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_events }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-calendar-event fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-success border-4 h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Active Events</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.active_events }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-warning border-4 h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending Registrations</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.pending_registrations }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-hourglass-split fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-info border-4 h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Total Participants</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_participants }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Event List</h6>
+            <div>
+                <button class="btn btn-sm btn-outline-secondary me-2" id="exportBtn">
+                    <i class="bi bi-download"></i> Export
+                </button>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="listViewBtn" title="List View">
+                        <i class="bi bi-list-ul"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary active" id="gridViewBtn" title="Grid View">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Grid View -->
+        <div class="card-body" id="gridView">
+            <div class="row g-4">
+                {% for event in events %}
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        {% if event.banner_image %}
+                        <img src="{{ url_for('static', filename='uploads/events/' + event.banner_image) }}" 
+                             class="card-img-top" alt="{{ event.title }}" style="height: 140px; object-fit: cover;">
+                        {% else %}
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 140px;">
+                            <i class="bi bi-calendar-event text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-1 text-truncate" title="{{ event.title }}">
+                                    {{ event.title }}
+                                </h5>
+                                <span class="badge {% if event.status == 'upcoming' %}bg-primary
+                                    {% elif event.status == 'ongoing' %}bg-success
+                                    {% elif event.status == 'past' %}bg-secondary
+                                    {% else %}bg-light text-dark{% endfor %}">
+                                    {{ event.status|title }}
+                                </span>
+                            </div>
+                            
+                            <div class="text-muted small mb-3">
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="bi bi-calendar3 me-2"></i>
+                                    {{ event.start_date.strftime('%b %d, %Y') }}
+                                    <span class="mx-1">-</span>
+                                    {{ event.end_date.strftime('%b %d, %Y') }}
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-people me-2"></i>
+                                    {{ event.registration_count }} registered
+                                </div>
+                            </div>
+                            
+                            <p class="card-text small text-muted flex-grow-1">
+                                {{ event.description|truncate(100) }}
+                            </p>
+                            
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{{ url_for('event_manager.view_event', event_id=event.id) }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="#">
+                                                    <i class="bi bi-pencil me-2"></i>Edit
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#">
+                                                    <i class="bi bi-clipboard-data me-2"></i>Analytics
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="#">
+                                                    <i class="bi bi-trash me-2"></i>Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12 text-center py-5">
+                    <div class="text-muted">
+                        <i class="bi bi-calendar-x" style="font-size: 3rem;"></i>
+                        <h4 class="mt-3">No events found</h4>
+                        <p>Create your first event to get started</p>
+                        <a href="{{ url_for('event_manager.create_event') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-lg"></i> Create Event
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if pagination.pages > 1 %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link" 
+                           href="{{ url_for('event_manager.events', page=pagination.prev_num, **request.args) }}">
+                            &laquo; Previous
+                        </a>
+                    </li>
+                    
+                    {% for page_num in pagination.iter_pages() %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                                <a class="page-link" 
+                                   href="{{ url_for('event_manager.events', page=page_num, **request.args) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link" 
+                           href="{{ url_for('event_manager.events', page=pagination.next_num, **request.args) }}">
+                            Next &raquo;
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle between grid and list view
+        const gridView = document.getElementById('gridView');
+        const listView = document.getElementById('listView');
+        const gridViewBtn = document.getElementById('gridViewBtn');
+        const listViewBtn = document.getElementById('listViewBtn');
+        
+        // Check for saved view preference or default to grid
+        const savedView = localStorage.getItem('eventManagerView') || 'grid';
+        
+        function setView(view) {
+            if (view === 'grid') {
+                gridView.style.display = 'block';
+                if (listView) listView.style.display = 'none';
+                gridViewBtn.classList.add('active');
+                listViewBtn.classList.remove('active');
+                localStorage.setItem('eventManagerView', 'grid');
+            } else {
+                gridView.style.display = 'none';
+                if (listView) listView.style.display = 'block';
+                listViewBtn.classList.add('active');
+                gridViewBtn.classList.remove('active');
+                localStorage.setItem('eventManagerView', 'list');
+            }
+        }
+        
+        // Initialize view
+        setView(savedView);
+        
+        // Add event listeners
+        gridViewBtn.addEventListener('click', () => setView('grid'));
+        if (listViewBtn) {
+            listViewBtn.addEventListener('click', () => setView('list'));
+        }
+        
+        // Export button functionality
+        const exportBtn = document.getElementById('exportBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', function() {
+                // Get current filters
+                const status = document.getElementById('status').value;
+                const eventType = document.getElementById('event_type').value;
+                
+                // Build export URL
+                let exportUrl = '{{ url_for("event_manager.export_events") }}';
+                const params = new URLSearchParams();
+                
+                if (status && status !== 'all') params.append('status', status);
+                if (eventType) params.append('event_type', eventType);
+                
+                if (params.toString()) {
+                    exportUrl += '?' + params.toString();
+                }
+                
+                // Trigger download
+                window.location.href = exportUrl;
+            });
+        }
+    });
+</script>
+{% endblock %}

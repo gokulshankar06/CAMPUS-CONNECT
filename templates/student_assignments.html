@@ -1,0 +1,68 @@
+{% extends '_base.html' %}
+
+{% block title %}Available Assignments · CampusConnect{% endblock %}
+
+{% block head_extra %}
+<style>
+  .assignments-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; }
+  .assignment-card { background: var(--card-bg, var(--gray-50)); color: var(--card-fg, var(--gray-900)); padding: var(--space-6); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); border: 1px solid var(--card-border, var(--gray-200)); transition: all .2s ease; display:flex; flex-direction:column; justify-content:space-between; min-height: 200px; text-align:left; }
+  .assignment-card:hover { background: var(--violet-surface-2, var(--gray-100)); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .assignment-actions { margin-top: 1rem; display:flex; justify-content:flex-end; }
+  @media (max-width: 768px) { .assignments-grid { grid-template-columns: 1fr; } }
+  .muted { color: var(--muted-color, var(--gray-600)); }
+  @media (prefers-color-scheme: dark) {
+    .assignment-card { background: var(--card-bg-dark, #1f2937); color: #e5e7eb; border-color: #374151; }
+    .assignment-card:hover { background: #374151; }
+    .muted { color: #9ca3af; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <header class="header header--brand" role="banner">
+    <h1 class="header-title">Available Assignments</h1>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('chatbot') }}">Chatbot</a>
+      <a href="{{ url_for('auth.logout') }}" class="text-red-600">Logout</a>
+    </nav>
+  </header>
+
+  <main class="container" role="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-4">
+          {% for category, message in messages %}
+            <div class="alert {{ 'alert-danger' if category == 'danger' else 'alert-success' }}" role="alert">
+              <p class="font-bold">{{ category.capitalize() }}</p>
+              <p>{{ message }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <h2 class="text-center mb-6">Assignments Available for Submission</h2>
+
+    <div class="assignments-grid">
+      {% if not assignments %}
+        <div class="col-span-full">
+          <p class="muted text-center italic">There are no assignments available at this time.</p>
+        </div>
+      {% else %}
+        {% for assignment in assignments %}
+          <div class="assignment-card mi-elevate mi-glow">
+            <div>
+              <h3 class="card-title mb-2">{{ assignment.title }}</h3>
+              <p>{{ assignment.description }}</p>
+              <p class="text-sm muted mt-1">Assigned by: <strong>{{ assignment.faculty_name }}</strong></p>
+            </div>
+            <div class="assignment-actions">
+              <a href="{{ url_for('student.assignment_submission', assignment_id=assignment.id) }}" class="btn btn-primary mi-press">Submit</a>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </main>
+{% endblock %}

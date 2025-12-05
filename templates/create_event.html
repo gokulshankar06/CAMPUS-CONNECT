@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Event · CampusConnect</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='futuristic-violet.css') }}" rel="stylesheet">
+  <style>
+    /* Page-Specific Create Event Styles */
+    body {
+      min-height: 100vh;
+      position: relative;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Animated background pattern */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(255, 0, 255, 0.2) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(139, 44, 247, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(57, 255, 20, 0.1) 0%, transparent 50%);
+      animation: create-pulse 20s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes create-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+
+    .page-header {
+      background: linear-gradient(135deg, rgba(255, 0, 255, 0.1), rgba(139, 44, 247, 0.15));
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 0, 255, 0.3);
+      padding: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), 0 0 60px rgba(255, 0, 255, 0.1);
+      text-align: center;
+    }
+
+    .page-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+      text-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .page-header h1 i {
+      color: #39ff14;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .nav a {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(139, 44, 247, 0.2));
+      border: 1px solid rgba(255, 0, 255, 0.4);
+      border-radius: 10px;
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+
+    .nav a:hover {
+      background: linear-gradient(135deg, rgba(255, 0, 255, 0.3), rgba(139, 44, 247, 0.3));
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(255, 0, 255, 0.3);
+    }
+
+    .content-wrapper {
+      position: relative;
+      z-index: 1;
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .form-container {
+      background: linear-gradient(145deg, rgba(255, 0, 255, 0.05), rgba(29, 0, 82, 0.85));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 0, 255, 0.2);
+      border-radius: 24px;
+      padding: 3rem;
+      box-shadow: 0 20px 60px rgba(255, 0, 255, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 2rem;
+    }
+
+    .form-group label {
+      display: block;
+      color: #ff00ff;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+      border: 1px solid rgba(255, 0, 255, 0.3);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: rgba(255, 0, 255, 0.6);
+      box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+    }
+
+    .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #39ff14;
+    }
+
+    .checkbox-group label {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 400;
+      cursor: pointer;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #39ff14, #00ff88);
+      color: #0a0015;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(57, 255, 20, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #ff00ff, #ff1493);
+      color: #fff;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 0, 255, 0.4);
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .alert-danger {
+      background: linear-gradient(135deg, rgba(255, 20, 147, 0.2), rgba(255, 0, 0, 0.1));
+      border: 1px solid rgba(255, 20, 147, 0.4);
+      color: #ff1493;
+    }
+
+    .alert-success {
+      background: linear-gradient(135deg, rgba(57, 255, 20, 0.2), rgba(0, 255, 136, 0.1));
+      border: 1px solid rgba(57, 255, 20, 0.4);
+      color: #39ff14;
+    }
+
+    .help-text {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .page-header h1 {
+        font-size: 2rem;
+      }
+
+      .form-container {
+        padding: 2rem;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .nav {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .form-actions {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header" role="banner">
+    <h1><i class="fas fa-plus"></i> Create New Event</h1>
+    <p style="color: rgba(255, 255, 255, 0.9); margin-bottom: 1rem;">Fill in the details below to create a new event for students to participate in.</p>
+    <nav class="nav" role="navigation" aria-label="Event Manager Navigation">
+      <a href="{{ url_for('main.dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="{{ url_for('event_manager.events') }}"><i class="fas fa-list"></i> My Events</a>
+      <a href="{{ url_for('event_manager.analytics') }}"><i class="fas fa-chart-bar"></i> Analytics</a>
+      <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+  </header>
+
+  <main class="content-wrapper">
+    <div class="form-container">
+      <form method="POST">
+        <div class="form-group">
+          <label for="title">Event Title *</label>
+          <input type="text" id="title" name="title" class="form-control" required
+                 placeholder="Enter event title" maxlength="200">
+          <div class="help-text">Choose a clear, engaging title for your event</div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description *</label>
+          <textarea id="description" name="description" class="form-control" rows="4" required
+                    placeholder="Describe your event in detail..."></textarea>
+          <div class="help-text">Provide details about what participants will do, learn, or experience</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="event_type">Event Type *</label>
+            <select id="event_type" name="event_type" class="form-control" required>
+              <option value="">Select event type</option>
+              <option value="hackathon">Hackathon</option>
+              <option value="competition">Competition</option>
+              <option value="workshop">Workshop</option>
+              <option value="seminar">Seminar</option>
+              <option value="project">Project</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="venue">Venue</label>
+            <input type="text" id="venue" name="venue" class="form-control"
+                   placeholder="Event location or 'Online'">
+            <div class="help-text">Leave empty if the event is online</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="start_date">Start Date & Time *</label>
+            <input type="datetime-local" id="start_date" name="start_date" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label for="end_date">End Date & Time *</label>
+            <input type="datetime-local" id="end_date" name="end_date" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="registration_deadline">Registration Deadline *</label>
+            <input type="datetime-local" id="registration_deadline" name="registration_deadline" class="form-control" required>
+            <div class="help-text">Last date for students to register</div>
+          </div>
+
+          <div class="form-group">
+            <label for="max_participants">Max Participants</label>
+            <input type="number" id="max_participants" name="max_participants" class="form-control"
+                   placeholder="Leave empty for unlimited" min="1">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="max_team_size">Max Team Size</label>
+            <input type="number" id="max_team_size" name="max_team_size" class="form-control"
+                   value="5" min="1" max="20">
+            <div class="help-text">Maximum members per team (if applicable)</div>
+          </div>
+
+          <div class="form-group">
+            <label for="min_team_size">Min Team Size</label>
+            <input type="number" id="min_team_size" name="min_team_size" class="form-control"
+                   value="1" min="1" max="5">
+            <div class="help-text">Minimum members per team</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="is_team_event" name="is_team_event" checked>
+            <label for="is_team_event">This is a team-based event</label>
+          </div>
+          <div class="help-text">Check if participants should form teams to participate</div>
+        </div>
+
+        <!-- Abstract Submission Requirements -->
+        <div class="form-group">
+          <h3 style="color: #39ff14; margin: 2rem 0 1rem 0; font-size: 1.3rem;">
+            <i class="fas fa-file-alt"></i> Abstract Submission Settings
+          </h3>
+          
+          <div class="checkbox-group" style="margin-bottom: 1rem;">
+            <input type="checkbox" id="requires_abstract" name="requires_abstract">
+            <label for="requires_abstract">Require abstract submissions for this event</label>
+          </div>
+          <div class="help-text">Enable this if participants need to submit project abstracts or proposals</div>
+          
+          <div id="abstract-settings" style="display: none; margin-top: 1.5rem; padding: 1.5rem; border: 1px solid rgba(255, 0, 255, 0.3); border-radius: 10px; background: rgba(57, 255, 20, 0.05);">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="abstract_min_words">Minimum Words</label>
+                <input type="number" id="abstract_min_words" name="abstract_min_words" class="form-control"
+                       value="150" min="50" max="1000">
+                <div class="help-text">Minimum word count for abstracts</div>
+              </div>
+
+              <div class="form-group">
+                <label for="abstract_max_words">Maximum Words</label>
+                <input type="number" id="abstract_max_words" name="abstract_max_words" class="form-control"
+                       value="500" min="100" max="2000">
+                <div class="help-text">Maximum word count for abstracts</div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="abstract_deadline">Abstract Submission Deadline</label>
+                <input type="datetime-local" id="abstract_deadline" name="abstract_deadline" class="form-control">
+                <div class="help-text">Deadline for abstract submissions (defaults to registration deadline)</div>
+              </div>
+
+              <div class="form-group">
+                <label for="plagiarism_threshold">Plagiarism Threshold (%)</label>
+                <input type="number" id="plagiarism_threshold" name="plagiarism_threshold" class="form-control"
+                       value="25" min="5" max="50" step="0.1">
+                <div class="help-text">Maximum allowed plagiarism percentage</div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="allowed_file_types">Allowed File Types</label>
+                <input type="text" id="allowed_file_types" name="allowed_file_types" class="form-control"
+                       value="pdf,docx,txt" placeholder="pdf,docx,txt">
+                <div class="help-text">Comma-separated list of allowed file extensions</div>
+              </div>
+
+              <div class="form-group">
+                <label for="max_file_size_mb">Max File Size (MB)</label>
+                <input type="number" id="max_file_size_mb" name="max_file_size_mb" class="form-control"
+                       value="5" min="1" max="50" step="0.1">
+                <div class="help-text">Maximum file size for uploads</div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="auto_approve_threshold">Auto-Approve Threshold (%)</label>
+                <input type="number" id="auto_approve_threshold" name="auto_approve_threshold" class="form-control"
+                       value="10" min="0" max="25" step="0.1">
+                <div class="help-text">Abstracts below this plagiarism score will be auto-approved</div>
+              </div>
+
+              <div class="form-group">
+                <label for="auto_approve_timeout_hours">Auto-Approve Timeout (Hours)</label>
+                <input type="number" id="auto_approve_timeout_hours" name="auto_approve_timeout_hours" class="form-control"
+                       value="72" min="24" max="168">
+                <div class="help-text">Hours after which pending abstracts are auto-approved</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="prize_pool">Prize Pool</label>
+          <input type="text" id="prize_pool" name="prize_pool" class="form-control"
+                 placeholder="e.g., $5000 total prizes">
+          <div class="help-text">Optional: Mention any prizes or rewards</div>
+        </div>
+
+        <div class="form-group">
+          <label for="resources_link">Resources Link</label>
+          <input type="url" id="resources_link" name="resources_link" class="form-control"
+                 placeholder="https://example.com/resources">
+          <div class="help-text">Link to additional resources, rules, or preparation materials</div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-plus"></i> Create Event
+          </button>
+          <a href="{{ url_for('event_manager.events') }}" class="btn-secondary">
+            <i class="fas fa-times"></i> Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    // Toggle abstract settings based on checkbox
+    document.addEventListener('DOMContentLoaded', function() {
+      const abstractCheckbox = document.getElementById('requires_abstract');
+      const abstractSettings = document.getElementById('abstract-settings');
+      
+      function toggleAbstractSettings() {
+        if (abstractCheckbox.checked) {
+          abstractSettings.style.display = 'block';
+        } else {
+          abstractSettings.style.display = 'none';
+        }
+      }
+      
+      // Initialize on page load
+      toggleAbstractSettings();
+      
+      // Add event listener
+      abstractCheckbox.addEventListener('change', toggleAbstractSettings);
+      
+      // Auto-set abstract deadline to registration deadline if not set
+      const regDeadlineInput = document.getElementById('registration_deadline');
+      const abstractDeadlineInput = document.getElementById('abstract_deadline');
+      
+      regDeadlineInput.addEventListener('change', function() {
+        if (!abstractDeadlineInput.value && regDeadlineInput.value) {
+          abstractDeadlineInput.value = regDeadlineInput.value;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

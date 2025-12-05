@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Create Team - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="header-section mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="dashboard-title">
+                            <i class="fas fa-users-plus me-2"></i>
+                            Create Team
+                        </h1>
+                        <p class="text-muted">{{ event.title }} - {{ event.event_type|title }}</p>
+                    </div>
+                    <a href="{{ url_for('events.event_details', event_id=event.id) }}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Event
+                    </a>
+                </div>
+            </div>
+
+            <!-- Event Team Requirements -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Team Requirements</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Team Size:</strong><br>
+                            {{ event.min_team_size }} - {{ event.max_team_size }} members
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Event Type:</strong><br>
+                            {{ event.event_type|title }}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Registration Deadline:</strong><br>
+                            {{ event.registration_deadline|format_datetime }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Creation Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        Team Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="createTeamForm">
+                        <!-- Team Name -->
+                        <div class="mb-3">
+                            <label for="team_name" class="form-label">Team Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="team_name" name="team_name" 
+                                   required minlength="3" maxlength="100">
+                            <div class="form-text">Choose a unique and memorable name for your team</div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Team Description</label>
+                            <textarea class="form-control" id="description" name="description" 
+                                      rows="4" maxlength="500"></textarea>
+                            <div class="form-text">Describe your team's goals, skills, or what you're looking for in members</div>
+                        </div>
+
+                        <!-- Team Settings -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="max_members" class="form-label">Maximum Members</label>
+                                <select class="form-select" id="max_members" name="max_members">
+                                    {% for i in range(event.min_team_size, event.max_team_size + 1) %}
+                                    <option value="{{ i }}" {% if i == event.max_team_size %}selected{% endif %}>
+                                        {{ i }} members
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Maximum number of members allowed in your team</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" id="is_public" name="is_public">
+                                    <label class="form-check-label" for="is_public">
+                                        Make team publicly visible
+                                    </label>
+                                    <div class="form-text">Allow other students to find and request to join your team</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skills Needed (Optional) -->
+                        <div class="mb-4">
+                            <label class="form-label">Skills Needed (Optional)</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Technical Skills</h6>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="skill_python" name="skills" value="Python">
+                                        <label class="form-check-label" for="skill_python">Python</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="skill_javascript" name="skills" value="JavaScript">
+                                        <label class="form-check-label" for="skill_javascript">JavaScript</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="skill_react" name="skills" value="React">
+                                        <label class="form-check-label" for="skill_react">React</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="skill_ml" name="skills" value="Machine Learning">
+                                        <label class="form-check-label" for="skill_ml">Machine Learning</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Design & Other Skills</h6>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="skill_uiux" name="skills" value="UI/UX Design">
+                                        <label class="form-check-label" for="skill_uiux">UI/UX Design</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="skill_graphic" name="skills" value="Graphic Design">
+                                        <label class="form-check-label" for="skill_graphic">Graphic Design</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="skill_marketing" name="skills" value="Marketing">
+                                        <label class="form-check-label" for="skill_marketing">Marketing</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="skill_business" name="skills" value="Business Analysis">
+                                        <label class="form-check-label" for="skill_business">Business Analysis</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>
+                                Create Team
+                            </button>
+                            <a href="{{ url_for('events.event_details', event_id=event.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tips for Team Success -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Tips for Team Success</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-users text-primary me-2"></i>Building Your Team</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Look for complementary skills</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Consider different perspectives</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Ensure good communication</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Set clear expectations</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-tasks text-primary me-2"></i>Team Management</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Define roles and responsibilities</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Use collaboration tools</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Regular check-ins and updates</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Celebrate milestones together</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+document.getElementById('createTeamForm').addEventListener('submit', function(e) {
+    const teamName = document.getElementById('team_name').value.trim();
+    
+    if (teamName.length < 3) {
+        e.preventDefault();
+        alert('Team name must be at least 3 characters long.');
+        return false;
+    }
+    
+    if (teamName.length > 100) {
+        e.preventDefault();
+        alert('Team name must be no more than 100 characters long.');
+        return false;
+    }
+});
+
+// Character counter for description
+document.getElementById('description').addEventListener('input', function() {
+    const maxLength = 500;
+    const currentLength = this.value.length;
+    const remaining = maxLength - currentLength;
+    
+    // Find or create character counter
+    let counter = document.getElementById('desc-counter');
+    if (!counter) {
+        counter = document.createElement('div');
+        counter.id = 'desc-counter';
+        counter.className = 'form-text text-end';
+        this.parentNode.appendChild(counter);
+    }
+    
+    counter.textContent = `${currentLength}/${maxLength} characters`;
+    counter.className = remaining < 50 ? 'form-text text-end text-warning' : 'form-text text-end text-muted';
+});
+</script>
+{% endblock %}

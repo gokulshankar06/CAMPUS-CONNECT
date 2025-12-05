@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Team - {{ event.title }} - CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Create New Team</h4>
+                        <a href="{{ url_for('events.view_event', event_id=event.id) }}" class="btn btn-sm btn-light">
+                            <i class="bi bi-arrow-left"></i> Back to Event
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        You're creating a team for <strong>{{ event.title }}</strong>. 
+                        {% if event.max_team_size %}
+                            Maximum team size: {{ event.max_team_size }} members.
+                        {% endif %}
+                    </div>
+                    
+                    <form id="teamForm" method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Team Information -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">Team Information</h5>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        {{ form.name.label(class="form-label") }}
+                                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), 
+                                            placeholder="Enter team name") }}
+                                        {% for error in form.name.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                        <small class="form-text text-muted">Choose a unique and descriptive name for your team.</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {{ form.max_members.label(class="form-label") }}
+                                        {{ form.max_members(class="form-control" + (" is-invalid" if form.max_members.errors else "")) }}
+                                        {% for error in form.max_members.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                        <small class="form-text text-muted">Max: {{ event.max_team_size or 'No limit' }}</small>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        {{ form.description.label(class="form-label") }}
+                                        {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), 
+                                            rows="3", placeholder="Briefly describe your team's goals or focus") }}
+                                        {% for error in form.description.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        {{ form.skills_needed.label(class="form-label") }}
+                                        {{ form.skills_needed(class="form-control" + (" is-invalid" if form.skills_needed.errors else ""), 
+                                            placeholder="e.g., Python, Design, Marketing") }}
+                                        <small class="form-text text-muted">Separate skills with commas</small>
+                                        {% for error in form.skills_needed.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Team Visibility -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">Team Settings</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form.visibility.label(class="form-label") }}
+                                        {{ form.visibility(class="form-select" + (" is-invalid" if form.visibility.errors else "")) }}
+                                        {% for error in form.visibility.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form.join_policy.label(class="form-label") }}
+                                        {{ form.join_policy(class="form-select" + (" is-invalid" if form.join_policy.errors else "")) }}
+                                        {% for error in form.join_policy.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        {{ form.looking_for_members(class="form-check-input" + (" is-invalid" if form.looking_for_members.errors else "")) }}
+                                        {{ form.looking_for_members.label(class="form-check-label") }}
+                                        {% for error in form.looking_for_members.errors %}
+                                            <div class="invalid-feedback d-block">{{ error }}</div>
+                                        {% endfor %}
+                                        <small class="form-text text-muted">Enable to show that your team is open to new members.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Team Avatar -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2 mb-3">Team Avatar</h5>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3 text-center">
+                                        <img id="avatarPreview" 
+                                             src="{{ url_for('static', filename='images/default-team.png') }}" 
+                                             class="img-thumbnail" 
+                                             alt="Team Avatar" 
+                                             style="max-width: 200px; max-height: 200px;">
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        {{ form.avatar.label(class="form-label") }}
+                                        {{ form.avatar(class="form-control" + (" is-invalid" if form.avatar.errors else "")) }}
+                                        {% for error in form.avatar.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                        <small class="form-text text-muted">Upload a square image (JPG/PNG, max 2MB).</small>
+                                    </div>
+                                    
+                                    <div class="form-group mt-3">
+                                        <label class="form-label">Or choose a color:</label>
+                                        <div class="d-flex flex-wrap gap-2" id="colorPalette">
+                                            {% for color in ['#3498db', '#2ecc71', '#e74c3c', '#f1c40f', '#9b59b6', '#1abc9c', '#e67e22', '#e74c3c', '#95a5a6', '#7f8c8d'] %}
+                                                <div class="color-option" style="width: 30px; height: 30px; background-color: {{ color }}; border-radius: 50%; cursor: pointer;" 
+                                                     data-color="{{ color }}"></div>
+                                            {% endfor %}
+                                        </div>
+                                        {{ form.color(value='#3498db', id='teamColor') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{{ url_for('events.view_event', event_id=event.id) }}" class="btn btn-outline-secondary me-md-2">
+                                <i class="bi bi-x-lg"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Create Team
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Preview uploaded image
+        const avatarInput = document.getElementById('{{ form.avatar.id }}');
+        const avatarPreview = document.getElementById('avatarPreview');
+        
+        if (avatarInput && avatarPreview) {
+            avatarInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        avatarPreview.src = e.target.result;
+                        // Hide color palette when image is uploaded
+                        document.getElementById('colorPalette').style.display = 'none';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        
+        // Color selection
+        const colorOptions = document.querySelectorAll('.color-option');
+        const teamColorInput = document.getElementById('teamColor');
+        
+        colorOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const color = this.getAttribute('data-color');
+                teamColorInput.value = color;
+                avatarPreview.style.backgroundColor = color;
+                // Clear file input when color is selected
+                if (avatarInput) avatarInput.value = '';
+            });
+        });
+        
+        // Form validation
+        const form = document.getElementById('teamForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Client-side validation can be added here
+                const teamName = document.getElementById('{{ form.name.id }}').value.trim();
+                if (!teamName) {
+                    e.preventDefault();
+                    alert('Please enter a team name');
+                    return false;
+                }
+                return true;
+            });
+        }
+    });
+</script>
+{% endblock %}

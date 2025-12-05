@@ -1,0 +1,97 @@
+{% extends '_base.html' %}
+
+{% block title %}Faculty Dashboard · CampusConnect{% endblock %}
+
+{% block head_extra %}
+<style>
+  .muted { color: var(--muted-color, var(--gray-600)); }
+  @media (prefers-color-scheme: dark) {
+    .card { background: #111827; color: #e5e7eb; border-color: #374151; }
+    .muted { color: #9ca3af; }
+  }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <header class="header header--brand" role="banner">
+    <h1 class="header-title">
+      <i class="fas fa-chalkboard-teacher"></i>
+      Faculty Dashboard
+    </h1>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="{{ url_for('faculty.faculty_assignments') }}"><i class="fas fa-tasks"></i> Assignments</a>
+      <a href="{{ url_for('faculty.create_assignment') }}"><i class="fas fa-plus-circle"></i> Create Assignment</a>
+      <a href="{{ url_for('chatbot') }}"><i class="fas fa-robot"></i> AI Assistant</a>
+      <a href="{{ url_for('auth.logout') }}" class="text-red-600"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+  </header>
+
+  <main class="container" role="main">
+    <section class="card text-center">
+      <h2 class="text-3xl font-bold mb-2">Welcome back, {{ user.username }}!</h2>
+      <p class="text-lg mb-6">Ready to inspire and guide your students today?</p>
+      <span class="badge badge-primary"><i class="fas fa-user-tie"></i>&nbsp; Faculty</span>
+    </section>
+
+    <section class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-bottom:1.5rem;">
+      <div class="card text-center">
+        <div class="text-3xl font-bold" style="color:var(--primary-600);">{{ assignments_count or 0 }}</div>
+        <div class="text-sm muted">Total Assignments</div>
+      </div>
+      <div class="card text-center">
+        <div class="text-3xl font-bold" style="color:var(--primary-600);">{{ active_assignments or 0 }}</div>
+        <div class="text-sm muted">Active</div>
+      </div>
+      <div class="card text-center">
+        <div class="text-3xl font-bold" style="color:var(--primary-600);">{{ total_submissions or 0 }}</div>
+        <div class="text-sm muted">Submissions</div>
+      </div>
+      <div class="card text-center">
+        <div class="text-3xl font-bold" style="color:var(--primary-600);">{{ pending_reviews or 0 }}</div>
+        <div class="text-sm muted">Pending Reviews</div>
+      </div>
+    </section>
+
+    <section class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Manage Assignments</h3>
+        </div>
+        <p class="card-description">View, edit, and manage all your assignments. Track student progress and monitor submission deadlines.</p>
+        <a href="{{ url_for('faculty.faculty_assignments') }}" class="btn btn-primary"><i class="fas fa-arrow-right"></i> View Assignments</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Create Assignment</h3>
+        </div>
+        <p class="card-description">Design new assignments with custom requirements, deadlines, and grading criteria for your students.</p>
+        <a href="{{ url_for('faculty.create_assignment') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Create New</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Review Submissions</h3>
+        </div>
+        <p class="card-description">Review student submissions, provide feedback, and assign grades efficiently.</p>
+        <a href="{{ url_for('faculty.faculty_assignments') }}" class="btn btn-primary"><i class="fas fa-eye"></i> Review Work</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">AI Teaching Assistant</h3>
+        </div>
+        <p class="card-description">Get help with creating assignments, generating questions, and educational content planning.</p>
+        <a href="{{ url_for('chatbot') }}" class="btn btn-primary"><i class="fas fa-comments"></i> Start Chat</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Analytics & Reports</h3>
+        </div>
+        <p class="card-description">View detailed analytics on student performance, assignment completion rates, and class progress.</p>
+        <a href="{{ url_for('faculty.analytics') }}" class="btn btn-primary"><i class="fas fa-chart-line"></i> View Analytics</a>
+      </div>
+    </section>
+  </main>
+{% endblock %}

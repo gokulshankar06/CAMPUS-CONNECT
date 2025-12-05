@@ -1,0 +1,445 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card glass-card">
+                <div class="card-header bg-transparent border-0">
+                    <h2 class="mb-0"><i class="fas fa-user-circle me-2"></i> My Profile</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <div class="row mb-4">
+                            <!-- Profile Picture -->
+                            <div class="col-md-4 text-center mb-4 mb-md-0">
+                                <div class="profile-picture-container">
+                                    <div class="profile-picture-wrapper mx-auto">
+                                        <img id="profilePreview" 
+                                             src="{{ url_for('static', filename=user_data['profile_pic'] if user_data['profile_pic'] else 'images/default-avatar.png') }}" 
+                                             class="img-fluid rounded-circle" 
+                                             alt="Profile Picture"
+                                             onerror="this.src='{{ url_for('static', filename='images/default-avatar.png') }}';">
+                                        <div class="profile-upload-overlay">
+                                            <i class="fas fa-camera"></i>
+                                            <span>Change</span>
+                                        </div>
+                                        <input type="file" name="profile_pic" id="profilePicInput" 
+                                               class="d-none" accept="image/*" 
+                                               onchange="previewImage(this)">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- User Info -->
+                            <div class="col-md-8">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="username" class="form-label">Username</label>
+                                        <input type="text" class="form-control" id="username" name="username"
+                                               value="{{ user_data.username }}" required>
+                                        <div class="invalid-feedback">
+                                            Please choose a username.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email"
+                                               value="{{ user_data.email }}" required>
+                                        <div class="invalid-feedback">
+                                            Please provide a valid email.
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="full_name" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="full_name" name="full_name"
+                                               value="{{ user_data.full_name or '' }}">
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="bio" class="form-label">Bio</label>
+                                        <textarea class="form-control" id="bio" name="bio" rows="3" 
+                                                  placeholder="Tell us about yourself...">{{ user_data.bio or '' }}</textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-2"></i>Save Changes
+                                            </button>
+                                            <span class="text-muted small">
+                                                Member since {{ current_user.created_at.strftime('%B %Y') }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Change Password Section -->
+                    <div class="card bg-dark border-0 mt-4">
+                        <div class="card-header bg-transparent border-0">
+                            <h5 class="mb-0"><i class="fas fa-key me-2"></i>Change Password</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('auth.change_password') }}" class="needs-validation" novalidate>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label for="current_password" class="form-label">Current Password</label>
+                                        <input type="password" class="form-control" id="current_password" 
+                                               name="current_password" required>
+                                        <div class="invalid-feedback">
+                                            Please enter your current password.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="new_password" class="form-label">New Password</label>
+                                        <input type="password" class="form-control" id="new_password" 
+                                               name="new_password" minlength="8" required>
+                                        <div class="invalid-feedback">
+                                            Password must be at least 8 characters long.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="confirm_password" class="form-label">Confirm New Password</label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" id="confirm_password" 
+                                                   name="confirm_password" required>
+                                            <button class="btn btn-outline-secondary" type="button" 
+                                                    id="togglePassword">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Passwords must match.
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            <i class="fas fa-key me-2"></i>Update Password
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Account Actions -->
+                    <div class="card bg-dark border-0 mt-4">
+                        <div class="card-header bg-transparent border-0">
+                            <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Account Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-column gap-3">
+                                <a href="#" class="btn btn-outline-warning">
+                                    <i class="fas fa-envelope me-2"></i>Change Email
+                                </a>
+                                <a href="#" class="btn btn-outline-info">
+                                    <i class="fas fa-bell me-2"></i>Notification Settings
+                                </a>
+                                <a href="#" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                                    <i class="fas fa-trash-alt me-2"></i>Delete Account
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-light">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="deleteAccountModalLabel">
+                    <i class="fas fa-exclamation-triangle text-danger me-2"></i>Delete Account
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+                <p class="mb-0">All your data will be permanently removed from our servers.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger">
+                    <i class="fas fa-trash-alt me-2"></i>Delete My Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .profile-picture-container {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        margin: 0 auto;
+    }
+    
+    .profile-picture-wrapper {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid rgba(139, 44, 247, 0.5);
+        position: relative;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .profile-picture-wrapper:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0 20px rgba(139, 44, 247, 0.5);
+        border-color: #8b2cf7;
+    }
+    
+    .profile-picture-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .profile-upload-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .profile-picture-wrapper:hover .profile-upload-overlay {
+        opacity: 1;
+    }
+    
+    .profile-upload-overlay i {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        overflow: hidden;
+    }
+    
+    .form-control, .form-select {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #8b2cf7;
+        color: #fff;
+        box-shadow: 0 0 0 0.25rem rgba(139, 44, 247, 0.25);
+    }
+    
+    .btn-outline-primary {
+        color: #8b2cf7;
+        border-color: #8b2cf7;
+    }
+    
+    .btn-outline-primary:hover {
+        background: #8b2cf7;
+        border-color: #8b2cf7;
+    }
+    
+    .btn-outline-danger {
+        color: #ff1493;
+        border-color: #ff1493;
+    }
+    
+    .btn-outline-danger:hover {
+        background: #ff1493;
+        border-color: #ff1493;
+    }
+    
+    .btn-outline-warning {
+        color: #ffc107;
+        border-color: #ffc107;
+    }
+    
+    .btn-outline-warning:hover {
+        background: #ffc107;
+        border-color: #ffc107;
+        color: #000;
+    }
+    
+    .btn-outline-info {
+        color: #00ffff;
+        border-color: #00ffff;
+    }
+    
+    .btn-outline-info:hover {
+        background: #00ffff;
+        border-color: #00ffff;
+        color: #000;
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: rgba(139, 44, 247, 0.5);
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: #8b2cf7;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .profile-picture-container {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card {
+            border-radius: 0;
+            border: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Profile picture upload preview
+    document.getElementById('profilePicInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('profilePreview').src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Function to preview the selected image
+    function previewImage(input) {
+        const preview = document.getElementById('profilePreview');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    
+    // Click on the profile picture to trigger file input
+    document.querySelector('.profile-picture-wrapper').addEventListener('click', function() {
+        document.getElementById('profilePicInput').click();
+    });
+    
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordInput = document.getElementById('new_password');
+        const confirmPasswordInput = document.getElementById('confirm_password');
+        const icon = this.querySelector('i');
+        
+        const type = passwordInput.type === 'password' ? 'text' : 'password';
+        passwordInput.type = type;
+        confirmPasswordInput.type = type;
+        
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    });
+    
+    // Form validation
+    (function() {
+        'use strict';
+        
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                
+                // Check if passwords match for the change password form
+                if (form.id === 'changePasswordForm') {
+                    const password = document.getElementById('new_password').value;
+                    const confirmPassword = document.getElementById('confirm_password').value;
+                    
+                    if (password !== confirmPassword) {
+                        document.getElementById('confirm_password').setCustomValidity("Passwords don't match");
+                        event.preventDefault();
+                        event.stopPropagation();
+                    } else {
+                        document.getElementById('confirm_password').setCustomValidity('');
+                    }
+                }
+                
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+    
+    // Add animation to elements when they come into view
+    document.addEventListener('DOMContentLoaded', function() {
+        const animateOnScroll = function() {
+            const elements = document.querySelectorAll('.fade-in');
+            
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('animate__animated', 'animate__fadeInUp');
+                }
+            });
+        };
+        
+        // Run once on load
+        animateOnScroll();
+        
+        // Run on scroll
+        window.addEventListener('scroll', animateOnScroll);
+    });
+</script>
+{% endblock %}

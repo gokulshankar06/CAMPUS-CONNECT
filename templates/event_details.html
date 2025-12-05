@@ -1,0 +1,642 @@
+               <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ event.title }} · CampusConnect</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='futuristic-violet.css') }}" rel="stylesheet">
+  <style>
+    /* Page-Specific Event Details Styles */
+    body {
+      min-height: 100vh;
+      position: relative;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Animated background pattern */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(0, 255, 255, 0.2) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(139, 44, 247, 0.15) 0%, transparent 45%);
+      animation: detail-pulse 20s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes detail-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.02); }
+    }
+
+    .page-header {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(139, 44, 247, 0.15));
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+      padding: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), 0 0 60px rgba(0, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    .page-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+      text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .page-header h1 i {
+      color: #00ffff;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .nav a {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(139, 44, 247, 0.2));
+      border: 1px solid rgba(0, 255, 255, 0.4);
+      border-radius: 10px;
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+
+    .nav a:hover {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(139, 44, 247, 0.3));
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3);
+    }
+
+    .content-wrapper {
+      position: relative;
+      z-index: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .event-hero {
+      background: linear-gradient(145deg, rgba(0, 255, 255, 0.05), rgba(29, 0, 82, 0.85));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 24px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .event-title {
+      color: #00ffff;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+
+    .event-type {
+      background: linear-gradient(135deg, #00ffff, #39ff14);
+      color: #0a0015;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+
+    .event-description {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .event-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .meta-card {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(139, 44, 247, 0.1));
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .meta-card i {
+      color: #00ffff;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .meta-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .meta-value {
+      color: #00ffff;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .status-upcoming {
+      background: linear-gradient(135deg, #39ff14, #00ff88);
+      color: #0a0015;
+    }
+
+    .status-ongoing {
+      background: linear-gradient(135deg, #00ffff, #00bfff);
+      color: #0a0015;
+    }
+
+    .status-completed {
+      background: linear-gradient(135deg, #8b2cf7, #a855f7);
+      color: #fff;
+    }
+
+    .registration-section {
+      background: linear-gradient(145deg, rgba(0, 255, 255, 0.05), rgba(29, 0, 82, 0.85));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .registration-status {
+      text-align: center;
+      padding: 1rem;
+      border-radius: 15px;
+      margin-bottom: 1rem;
+    }
+
+    .registration-status.registered {
+      background: linear-gradient(135deg, rgba(57, 255, 20, 0.2), rgba(0, 255, 136, 0.1));
+      border: 1px solid rgba(57, 255, 20, 0.4);
+      color: #39ff14;
+    }
+
+    .registration-status.not-registered {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 191, 255, 0.1));
+      border: 1px solid rgba(0, 255, 255, 0.4);
+      color: #00ffff;
+    }
+
+    .registration-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #39ff14, #00ff88);
+      color: #0a0015;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(57, 255, 20, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #00ffff, #00bfff);
+      color: #0a0015;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 255, 255, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ff1493, #ff0080);
+      color: #fff;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 20, 147, 0.4);
+    }
+
+    .teams-section {
+      background: linear-gradient(145deg, rgba(0, 255, 255, 0.05), rgba(29, 0, 82, 0.85));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 2rem;
+    }
+
+    .teams-section h2 {
+      color: #00ffff;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .teams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .team-card {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(139, 44, 247, 0.1));
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .team-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 255, 255, 0.2);
+    }
+
+    .team-name {
+      color: #00ffff;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .team-description {
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .team-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .team-members {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.85rem;
+    }
+
+    .team-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-small {
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    .no-teams {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      padding: 2rem;
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      .page-header h1 {
+        font-size: 2rem;
+      }
+
+      .event-meta-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .teams-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .registration-actions {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header" role="banner">
+    <h1><i class="fas fa-calendar-alt"></i> {{ event.title }}</h1>
+    <nav class="nav" role="navigation" aria-label="Event Navigation">
+      <a href="{{ url_for('events.browse_events') }}"><i class="fas fa-arrow-left"></i> Back to Events</a>
+      <a href="{{ url_for('main.dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="{{ url_for('events.my_events') }}"><i class="fas fa-list"></i> My Events</a>
+      <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+  </header>
+
+  <main class="content-wrapper">
+    <!-- Event Hero Section -->
+    <div class="event-hero">
+      <div class="event-type">{{ event.event_type|title }}</div>
+      <h2 class="event-title">{{ event.title }}</h2>
+      <p class="event-description">{{ event.description }}</p>
+
+      <div class="status-badge status-{{ event.status }}">
+        <i class="fas fa-circle"></i>
+        {{ event.status|title }}
+      </div>
+    </div>
+
+    <!-- Event Meta Information -->
+    <div class="event-meta-grid">
+      <div class="meta-card">
+        <i class="fas fa-calendar"></i>
+        <div class="meta-label">Start Date</div>
+        <div class="meta-value">{{ event.start_date|format_datetime }}</div>
+      </div>
+
+      <div class="meta-card">
+        <i class="fas fa-clock"></i>
+        <div class="meta-label">End Date</div>
+        <div class="meta-value">{{ event.end_date|format_datetime }}</div>
+      </div>
+
+      <div class="meta-card">
+        <i class="fas fa-clock"></i>
+        <div class="meta-label">Registration Deadline</div>
+        <div class="meta-value">{{ event.registration_deadline|format_datetime }}</div>
+      </div>
+
+      <div class="meta-card">
+        <i class="fas fa-map-marker-alt"></i>
+        <div class="meta-label">Venue</div>
+        <div class="meta-value">{{ event.venue or 'Online' }}</div>
+      </div>
+
+      <div class="meta-card">
+        <i class="fas fa-user"></i>
+        <div class="meta-label">Event Manager</div>
+        <div class="meta-value">{{ event.manager_name }}</div>
+      </div>
+
+      <div class="meta-card">
+        <i class="fas fa-users"></i>
+        <div class="meta-label">Max Participants</div>
+        <div class="meta-value">{{ event.max_participants or 'Unlimited' }}</div>
+      </div>
+    </div>
+
+    <!-- Registration Section -->
+    {% if current_user.role == 'student' %}
+      <div class="registration-section">
+        {% if registration %}
+          <div class="registration-status registered">
+            <i class="fas fa-check-circle"></i>
+            <h3>You're Registered!</h3>
+            <p>Registration Status: {{ registration.registration_status|title }}</p>
+            <p>Registered on: {{ registration.registered_at|format_datetime }}</p>
+          </div>
+
+          <div class="registration-actions">
+            <form method="POST" action="{{ url_for('events.unregister_from_event', event_id=event.id) }}" style="display: inline;">
+              <button type="submit" class="btn-danger" onclick="return confirm('Are you sure you want to unregister from this event?')">
+                <i class="fas fa-times"></i> Unregister
+              </button>
+            </form>
+          </div>
+        {% else %}
+          <div class="registration-status not-registered">
+            <i class="fas fa-info-circle"></i>
+            <h3>Not Registered Yet</h3>
+            <p>Register now to participate in this event!</p>
+          </div>
+
+          <div class="registration-actions">
+            {% if event.status in ['upcoming', 'ongoing'] %}
+              <form method="POST" action="{{ url_for('events.register_for_event', event_id=event.id) }}" style="display: inline;">
+                <button type="submit" class="btn-primary">
+                  <i class="fas fa-plus"></i> Register for Event
+                </button>
+              </form>
+            {% else %}
+              <button class="btn-secondary" disabled>
+                <i class="fas fa-times"></i> Registration Closed
+              </button>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <!-- Abstract Submission Section -->
+    {% if event.requires_abstract and current_user.role == 'student' and registration %}
+      <div class="registration-section">
+        <h3 style="color: #00ffff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-file-alt"></i> Abstract Submission
+        </h3>
+        
+        <div class="event-meta-grid" style="margin-bottom: 1.5rem;">
+          <div class="meta-card">
+            <i class="fas fa-word"></i>
+            <div class="meta-label">Word Limit</div>
+            <div class="meta-value">{{ event.abstract_min_words }}-{{ event.abstract_max_words }} words</div>
+          </div>
+          
+          <div class="meta-card">
+            <i class="fas fa-clock"></i>
+            <div class="meta-label">Submission Deadline</div>
+            <div class="meta-value">{{ event.abstract_deadline|format_datetime if event.abstract_deadline else 'Same as registration' }}</div>
+          </div>
+          
+          <div class="meta-card">
+            <i class="fas fa-file"></i>
+            <div class="meta-label">Allowed Files</div>
+            <div class="meta-value">{{ event.allowed_file_types|upper if event.allowed_file_types else 'PDF, DOCX, TXT' }}</div>
+          </div>
+          
+          <div class="meta-card">
+            <i class="fas fa-weight"></i>
+            <div class="meta-label">Max File Size</div>
+            <div class="meta-value">{{ event.max_file_size_mb or 5 }} MB</div>
+          </div>
+        </div>
+
+        {% if user_abstract %}
+          <div class="registration-status registered">
+            <i class="fas fa-check-circle"></i>
+            <h4>Abstract Submitted!</h4>
+            <p><strong>Title:</strong> {{ user_abstract.title }}</p>
+            <p><strong>Status:</strong> {{ user_abstract.status|title }}</p>
+            <p><strong>Word Count:</strong> {{ user_abstract.word_count }} words</p>
+            <p><strong>Submitted:</strong> {{ user_abstract.submitted_at|format_datetime if user_abstract.submitted_at else 'Draft' }}</p>
+            {% if user_abstract.plagiarism_score is not none %}
+              {% set plagiarism_percent = (user_abstract.plagiarism_score * 100)|round(1) %}
+              <p><strong>Plagiarism Score:</strong> {{ plagiarism_percent }}%</p>
+            {% endif %}
+            {% if user_abstract.feedback %}
+              <p><strong>Feedback:</strong> {{ user_abstract.feedback }}</p>
+            {% endif %}
+          </div>
+
+          <div class="registration-actions">
+            <a href="{{ url_for('abstracts.view_submission', submission_id=user_abstract.id) }}" class="btn-secondary">
+              <i class="fas fa-eye"></i> View Abstract
+            </a>
+            {% if user_abstract.status in ['draft', 'revision_required'] %}
+              <a href="{{ url_for('abstracts.submit_abstract', event_id=event.id) }}" class="btn-primary">
+                <i class="fas fa-edit"></i> Edit Abstract
+              </a>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="registration-status not-registered">
+            <i class="fas fa-info-circle"></i>
+            <h4>Abstract Required</h4>
+            <p>This event requires you to submit an abstract or project proposal.</p>
+            <p>Make sure to submit your abstract before the deadline.</p>
+          </div>
+
+          <div class="registration-actions">
+            <a href="{{ url_for('abstracts.submit_abstract', event_id=event.id) }}" class="btn-primary">
+              <i class="fas fa-plus"></i> Submit Abstract
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <!-- Teams Section -->
+    {% if event.is_team_event %}
+      <div class="teams-section">
+        <h2><i class="fas fa-users"></i> Available Teams</h2>
+        
+        {% if current_user.role == 'student' and not user_team %}
+          <div style="margin: 1rem 0;">
+            <a href="{{ url_for('teams.create_team', event_id=event.id) }}" class="btn btn-primary">
+              <i class="fas fa-plus-circle"></i> Create New Team
+            </a>
+          </div>
+        {% endif %}
+
+        {% if teams %}
+          <div class="teams-grid">
+            {% for team in teams %}
+              <div class="team-card">
+                <h4 class="team-name">{{ team.name }}</h4>
+                <p class="team-description">{{ team.description or 'No description available' }}</p>
+
+                <div class="team-meta">
+                  <div class="team-members">
+                    <i class="fas fa-users"></i> {{ team.member_count }}/{{ team.max_members }} members
+                  </div>
+                  <div class="team-status">
+                    {% if team.is_open %}
+                      <span style="color: #39ff14;"><i class="fas fa-unlock"></i> Open</span>
+                    {% else %}
+                      <span style="color: #ff1493;"><i class="fas fa-lock"></i> Closed</span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="team-actions">
+                  <a href="{{ url_for('events.team_details', team_id=team.id) }}" class="btn-small btn-primary">
+                    <i class="fas fa-eye"></i> View
+                  </a>
+                  {% if current_user.role == 'student' and not user_team %}
+                    <form method="POST" action="{{ url_for('events.join_team', team_id=team.id) }}" style="display: inline;">
+                      <button type="submit" class="btn-small btn-secondary">
+                        <i class="fas fa-plus"></i> Join
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="no-teams">
+            <i class="fas fa-users-slash"></i>
+            <p>No teams have been created for this event yet.</p>
+            {% if current_user.role == 'student' %}
+              <p>You can create a new team or wait for others to create teams.</p>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </main>
+</body>
+</html>

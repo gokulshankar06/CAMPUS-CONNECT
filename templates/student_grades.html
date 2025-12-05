@@ -1,0 +1,107 @@
+{% extends '_base.html' %}
+
+{% block title %}My Grades · CampusConnect{% endblock %}
+
+{% block head_extra %}
+<style>
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); margin-top: var(--space-4); }
+  details.feedback summary { list-style: none; }
+  details.feedback summary::-webkit-details-marker { display: none; }
+  details.feedback summary { cursor: pointer; }
+  .details-summary { display: inline-flex; align-items: center; gap: .5rem; }
+  .chev { transition: transform .2s ease; }
+  details[open] .chev { transform: rotate(180deg); }
+</style>
+{% endblock %}
+
+{% block content %}
+  <header class="header header--brand" role="banner">
+    <h1 class="header-title"><i class="fas fa-chart-line"></i> My Grades</h1>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('student.student_assignments') }}">Assignments</a>
+      <a href="{{ url_for('auth.logout') }}">Logout</a>
+    </nav>
+  </header>
+
+  <main role="main">
+    <div class="container">
+      {% if grades %}
+        <section class="card">
+          <div style="overflow-x:auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Assignment</th>
+                  <th>Grade</th>
+                  <th>Max Marks</th>
+                  <th>Percentage</th>
+                  <th>Submitted At</th>
+                  <th>Feedback</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for grade in grades %}
+                {% set pct = (grade.grade / grade.max_marks * 100) if grade.max_marks else 0 %}
+                <tr>
+                  <td>{{ grade.title }}</td>
+                  <td>
+                    <span class="badge {% if pct >= 80 %}badge-success{% elif pct >= 60 %}badge-warning{% else %}badge-danger{% endif %}">
+                      {{ grade.grade }}
+                    </span>
+                  </td>
+                  <td>{{ grade.max_marks }}</td>
+                  <td>{{ "%.1f"|format(pct) }}%</td>
+                  <td>{{ grade.submitted_at }}</td>
+                  <td>
+                    {% if grade.feedback %}
+                      <details class="feedback">
+                        <summary class="btn btn-secondary btn-sm details-summary">
+                          <i class="fas fa-comment"></i> View <i class="fas fa-chevron-down chev"></i>
+                        </summary>
+                        <div class="card" style="margin-top: .75rem;">
+                          <div class="card-description" style="margin: 0;">{{ grade.feedback }}</div>
+                        </div>
+                      </details>
+                    {% else %}
+                      <span class="muted">No feedback</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="stats-grid">
+          <div class="card text-center">
+            <h5 class="card-title">Average Grade</h5>
+            <h3 style="margin: .5rem 0 0; color: var(--primary-700);">
+              {{ "%.1f"|format((grades|sum(attribute='grade')) / ((grades|sum(attribute='max_marks')) or 1) * 100) }}%
+            </h3>
+          </div>
+          <div class="card text-center">
+            <h5 class="card-title">Total Assignments</h5>
+            <h3 style="margin: .5rem 0 0; color: var(--muted-color);">{{ grades|length }}</h3>
+          </div>
+          <div class="card text-center">
+            <h5 class="card-title">Highest Grade</h5>
+            <h3 style="margin: .5rem 0 0; color: var(--emerald-600);">{{ grades|max(attribute='grade') }}</h3>
+          </div>
+        </section>
+      {% else %}
+        <section class="card text-center">
+          <div class="animate-fade-in">
+            <i class="fas fa-chart-line fa-3x" style="color: var(--gray-400);"></i>
+            <h5 class="muted" style="margin-top: .5rem;">No grades available</h5>
+            <p class="muted">Your graded assignments will appear here.</p>
+            <a href="{{ url_for('student.student_assignments') }}" class="btn btn-primary">
+              <i class="fas fa-tasks"></i> View Assignments
+            </a>
+          </div>
+        </section>
+      {% endif %}
+    </div>
+  </main>
+{% endblock %}

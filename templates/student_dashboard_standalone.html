@@ -1,0 +1,523 @@
+  1
+  `  
+  
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard - Event Management · CampusConnect</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='futuristic-violet.css') }}" rel="stylesheet">
+  <style>
+    /* Page-Specific Student Dashboard Styles */
+    body {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Unique animated grid pattern for student dashboard */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+        radial-gradient(circle at 30% 80%, rgba(0, 255, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 70% 20%, rgba(139, 44, 247, 0.2) 0%, transparent 45%);
+      background-size: 50px 50px, 50px 50px, cover, cover;
+      animation: grid-move 20s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes grid-move {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    /* Enhanced Header with Student Theme */
+    .dashboard-header {
+      background: linear-gradient(135deg, rgba(0, 191, 255, 0.1), rgba(139, 44, 247, 0.2));
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+      padding: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), 0 0 80px rgba(0, 255, 255, 0.1);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .dashboard-title {
+      font-size: 3rem;
+      font-weight: 800;
+      font-family: 'Poppins', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin: 0 0 1.5rem 0;
+      background: linear-gradient(135deg, #00ffff, #00bfff, #8b2cf7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 60px rgba(0, 255, 255, 0.5);
+      animation: title-pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes title-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    /* Navigation with Cyan Accents */
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      color: #e9d5ff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 24px;
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      background: rgba(0, 191, 255, 0.1);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 0.875rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-link::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.4), transparent);
+      transform: translate(-50%, -50%);
+      transition: width 0.5s ease, height 0.5s ease;
+    }
+
+    .nav-link:hover::before {
+      width: 150%;
+      height: 150%;
+    }
+
+    .nav-link:hover {
+      color: #00ffff;
+      border-color: #00ffff;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 255, 255, 0.4);
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+    }
+
+    .nav-link.logout {
+      border-color: rgba(255, 20, 147, 0.3);
+      background: rgba(255, 20, 147, 0.1);
+    }
+
+    .nav-link.logout:hover {
+      color: #ff1493;
+      border-color: #ff1493;
+      box-shadow: 0 8px 25px rgba(255, 20, 147, 0.4);
+      text-shadow: 0 0 10px rgba(255, 20, 147, 0.8);
+    }
+
+    /* Main Container */
+    .main-container {
+      max-width: 1200px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Welcome Card with Gradient Border */
+    .welcome-card {
+      background: linear-gradient(145deg, rgba(0, 191, 255, 0.05), rgba(29, 0, 82, 0.8));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      border-radius: 32px;
+      padding: 3rem;
+      margin-bottom: 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 100px rgba(0, 255, 255, 0.1),
+        inset 0 0 60px rgba(0, 255, 255, 0.05);
+      animation: welcome-float 6s ease-in-out infinite;
+    }
+
+    @keyframes welcome-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .welcome-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #00ffff, #00bfff, #8b2cf7, #00ffff);
+      border-radius: 32px;
+      opacity: 0.6;
+      z-index: -1;
+      animation: rotate 4s linear infinite;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .welcome-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #ffffff, #00ffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .welcome-subtitle {
+      color: #c084fc;
+      font-size: 1.125rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.5rem;
+      background: linear-gradient(135deg, #00bfff, #00ffff);
+      color: #0a0015;
+      border-radius: 24px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 20px rgba(0, 255, 255, 0.4);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .stat-card {
+      background: linear-gradient(145deg, rgba(29, 0, 82, 0.7), rgba(36, 0, 66, 0.8));
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(139, 44, 247, 0.3);
+      border-radius: 24px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .stat-card:hover::after {
+      left: 100%;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px) scale(1.05);
+      border-color: #00ffff;
+      box-shadow: 0 15px 40px rgba(0, 255, 255, 0.3);
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #00ffff, #8b2cf7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: #c084fc;
+      text-transform: uppercase;
+      font-size: 0.875rem;
+      letter-spacing: 1.5px;
+    }
+
+    /* Feature Cards Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: linear-gradient(145deg, rgba(36, 0, 66, 0.9), rgba(29, 0, 82, 0.95));
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(139, 44, 247, 0.3);
+      border-radius: 24px;
+      padding: 2rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      min-height: 400px;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.1), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      border-color: #00ffff;
+      box-shadow: 0 20px 50px rgba(0, 255, 255, 0.3), 0 0 80px rgba(139, 44, 247, 0.2);
+    }
+
+    .feature-icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem auto;
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(139, 44, 247, 0.3));
+      border: 2px solid rgba(0, 255, 255, 0.4);
+      border-radius: 50%;
+      font-size: 2rem;
+      color: #00ffff;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+      transform: scale(1.1) rotate(5deg);
+      border-color: #00ffff;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+    }
+
+    .feature-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .feature-description {
+      color: #c084fc;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      text-align: center;
+      min-height: 3.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .feature-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #6b00d4, #5200a3);
+      color: white;
+      border: 2px solid #8b2cf7;
+      border-radius: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      margin-top: auto;
+    }
+
+    .feature-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+      transform: translate(-50%, -50%);
+      transition: width 0.5s ease, height 0.5s ease;
+    }
+
+    .feature-btn:hover::before {
+      width: 200%;
+      height: 200%;
+    }
+
+    .feature-btn:hover {
+      background: linear-gradient(135deg, #00ffff, #00bfff);
+      border-color: #00ffff;
+      color: #0a0015;
+      transform: translateX(5px);
+      box-shadow: 0 5px 20px rgba(0, 255, 255, 0.4);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .dashboard-title { font-size: 2rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .features-grid { grid-template-columns: 1fr; }
+      .main-container { padding: 0 1rem; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .nav { flex-direction: column; }
+      .nav-link { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header class="dashboard-header" role="banner">
+    <div class="header-content"> 
+      <h1 class="dashboard-title">
+        <i class="fas fa-calendar-alt"></i> Student Dashboard
+      </h1>
+      <nav class="nav" role="navigation" aria-label="Primary">
+        <a href="{{ url_for('events.browse_events') }}" class="nav-link">
+          <i class="fas fa-calendar-alt"></i> Browse Events
+        </a>
+        <a href="{{ url_for('events.my_events') }}" class="nav-link">
+          <i class="fas fa-list"></i> My Events
+        </a>
+        <a href="{{ url_for('events.browse_events') }}" class="nav-link">
+          <i class="fas fa-users"></i> Join/Create Team
+        </a>
+        <a href="{{ url_for('chatbot') }}" class="nav-link">
+          <i class="fas fa-robot"></i> AI Assistant
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link logout">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-container" role="main">
+    <!-- Welcome Section -->
+    <section class="welcome-card">
+      <p class="welcome-message">Welcome back, {{ user.full_name or user.username }}! Discover exciting events and join teams to participate.</p>
+      <span class="role-badge">
+        <i class="fas fa-user-graduate"></i> Student
+      </span>
+    </section>
+
+    <!-- Statistics Grid -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <i class="fas fa-calendar-plus"></i>
+        <h3>Available Events</h3>
+        <span class="stat-number">{{ upcoming_events|length if upcoming_events else 0 }}</span>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-calendar-check"></i>
+        <h3>Registered Events</h3>
+        <span class="stat-number">{{ registered_events|length if registered_events else 0 }}</span>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-star"></i>
+        <h3>Recommended</h3>
+        <span class="stat-number">{{ recommended_events|length if recommended_events else 0 }}</span>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-users"></i>
+        <h3>Teams Joined</h3>
+        <span class="stat-number">{{ teams_count|default(0) }}</span>
+      </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <h3 class="feature-title">Browse Events</h3>
+        <p class="feature-description">Discover upcoming events and competitions</p>
+        <a href="{{ url_for('events.browse_events') }}" class="feature-btn">
+          <i class="fas fa-arrow-right"></i> Browse Events
+        </a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <h3 class="feature-title">Join Teams</h3>
+        <p class="feature-description">Connect with other students and form teams for events</p>
+        <a href="{{ url_for('events.browse_events') }}" class="feature-btn">
+          <i class="fas fa-users"></i> Find Teams
+        </a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-list"></i>
+        </div>
+        <h3 class="feature-title">My Events</h3>
+        <p class="feature-description">View and manage your event registrations</p>
+        <a href="{{ url_for('events.my_events') }}" class="feature-btn">
+          <i class="fas fa-arrow-right"></i> My Events
+        </a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

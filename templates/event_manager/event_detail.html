@@ -1,0 +1,636 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ event.title }} - Event Details - CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Event Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('event_manager.events') }}">Events</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ event.title|truncate(30) }}</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0">{{ event.title }}</h1>
+            <div class="d-flex align-items-center mt-2">
+                <span class="badge {% if event.status == 'upcoming' %}bg-primary
+                    {% elif event.status == 'ongoing' %}bg-success
+                    {% elif event.status == 'past' %}bg-secondary
+                    {% else %}bg-light text-dark{% endfor %} me-2">
+                    {{ event.status|title }}
+                </span>
+                <span class="text-muted small">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    {{ event.start_date.strftime('%b %d, %Y') }} - {{ event.end_date.strftime('%b %d, %Y') }}
+                </span>
+            </div>
+        </div>
+        <div class="btn-group">
+            <a href="{{ url_for('event_manager.edit_event', event_id=event.id) }}" class="btn btn-outline-primary">
+                <i class="bi bi-pencil"></i> Edit Event
+            </a>
+            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="visually-hidden">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="bi bi-download me-2"></i>Export Data
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#emailParticipantsModal">
+                        <i class="bi bi-envelope me-2"></i>Email Participants
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteEventModal">
+                        <i class="bi bi-trash me-2"></i>Delete Event
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-primary border-4 h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Registrations</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_registrations }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-end">
+                        <a href="#registrations" class="text-xs text-primary">View All <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if event.is_team_event %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-success border-4 h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Teams Registered</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.teams_registered }}/{{ event.max_teams|default('∞') }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people-fill fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-end">
+                        <a href="#teams" class="text-xs text-success">View Teams <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if event.requires_abstract %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-warning border-4 h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Abstracts Submitted</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ stats.abstracts_submitted }}/{{ stats.expected_abstracts }}
+                                <small class="text-muted">({{ ((stats.abstracts_submitted / stats.expected_abstracts * 100) if stats.expected_abstracts > 0 else 0|int }}%)</small>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-file-text fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-end">
+                        <a href="#abstracts" class="text-xs text-warning">Review Abstracts <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-info border-4 h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Registration Status</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% if event.registration_deadline and event.registration_deadline < now %}
+                                    Closed
+                                {% else %}
+                                    Open
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-door-open fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-end">
+                        <a href="#" class="text-xs text-info" data-bs-toggle="modal" data-bs-target="#registrationSettingsModal">
+                            Settings <i class="bi bi-gear"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Event Overview -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Event Overview</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary active" id="descriptionTab">Description</button>
+                        <button class="btn btn-outline-secondary" id="scheduleTab">Schedule</button>
+                        <button class="btn btn-outline-secondary" id="resourcesTab">Resources</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="descriptionContent">
+                        <div class="mb-4">
+                            {% if event.banner_image %}
+                            <img src="{{ url_for('static', filename='uploads/events/' + event.banner_image) }}" 
+                                 class="img-fluid rounded mb-3" alt="{{ event.title }}">
+                            {% endif %}
+                            <div class="event-description">
+                                {{ event.description|safe }}
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-geo-alt me-2"></i>Venue</h6>
+                                <p class="ms-4">{{ event.venue or 'Not specified' }}</p>
+                                
+                                <h6 class="mt-4"><i class="bi bi-trophy me-2"></i>Prizes</h6>
+                                <p class="ms-4">{{ event.prize_pool or 'No prize pool specified' }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-calendar-event me-2"></i>Event Dates</h6>
+                                <ul class="list-unstyled ms-4">
+                                    <li>Start: {{ event.start_date.strftime('%B %d, %Y %I:%M %p') }}</li>
+                                    <li>End: {{ event.end_date.strftime('%B %d, %Y %I:%M %p') }}</li>
+                                    {% if event.registration_deadline %}
+                                    <li>Registration Deadline: {{ event.registration_deadline.strftime('%B %d, %Y %I:%M %p') }}</li>
+                                    {% endif %}
+                                </ul>
+                                
+                                {% if event.resources_link %}
+                                <h6 class="mt-4"><i class="bi bi-link-45deg me-2"></i>Resources</h6>
+                                <p class="ms-4">
+                                    <a href="{{ event.resources_link }}" target="_blank">
+                                        {{ event.resources_link|truncate(30) }}
+                                    </a>
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="scheduleContent" style="display: none;">
+                        <!-- Schedule content will be loaded here -->
+                        <div class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-calendar2-week" style="font-size: 2rem;"></i>
+                                <p class="mt-3">No schedule available yet</p>
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-plus"></i> Add Schedule
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="resourcesContent" style="display: none;">
+                        <!-- Resources content will be loaded here -->
+                        <div class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-folder" style="font-size: 2rem;"></i>
+                                <p class="mt-3">No resources available yet</p>
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-upload"></i> Upload Resources
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for activity in recent_activities %}
+                        <div class="timeline-item">
+                            <div class="timeline-badge {% if activity.type == 'registration' %}bg-primary
+                                {% elif activity.type == 'submission' %}bg-success
+                                {% elif activity.type == 'update' %}bg-info
+                                {% else %}bg-secondary{% endif %}">
+                                <i class="bi {% if activity.type == 'registration' %}bi-person-plus
+                                    {% elif activity.type == 'submission' %}bi-file-earmark-text
+                                    {% elif activity.type == 'update' %}bi-arrow-repeat
+                                    {% else %}bi-bell{% endif %}"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="mb-1">{{ activity.title }}</h6>
+                                    <small class="text-muted">{{ activity.timestamp|timesince }} ago</small>
+                                </div>
+                                <p class="small mb-1">{{ activity.description }}</p>
+                                {% if activity.user %}
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ url_for('static', filename='uploads/profiles/' + activity.user.profile_pic) if activity.user.profile_pic 
+                                        else url_for('static', filename='images/default-avatar.png') }}" 
+                                         class="rounded-circle me-2" width="24" height="24" 
+                                         alt="{{ activity.user.full_name }}">
+                                    <small class="text-muted">{{ activity.user.full_name }}</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="bi bi-activity" style="font-size: 2rem;"></i>
+                                <p class="mt-2 mb-0">No recent activity</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="bi bi-pencil-square me-2"></i>Edit Event Details
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="bi bi-people me-2"></i>Manage Participants
+                    </a>
+                    {% if event.is_team_event %}
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="bi bi-diagram-3 me-2"></i>Manage Teams
+                    </a>
+                    {% endif %}
+                    {% if event.requires_abstract %}
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="bi bi-file-earmark-text me-2"></i>Review Abstracts
+                    </a>
+                    {% endif %}
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="bi bi-envelope me-2"></i>Email Participants
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="bi bi-download me-2"></i>Export Data
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action text-danger" data-bs-toggle="modal" data-bs-target="#cancelEventModal">
+                        <i class="bi bi-x-circle me-2"></i>Cancel Event
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Event Status -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Event Status</h5>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="eventStatusToggle" 
+                               {% if event.is_active %}checked{% endif %}>
+                        <label class="form-check-label" for="eventStatusToggle">
+                            {% if event.is_active %}Active{% else %}Inactive{% endif %}
+                        </label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ event.progress }}%;" 
+                             aria-valuenow="{{ event.progress }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            {{ event.progress }}%
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted">
+                        <span>Start: {{ event.start_date.strftime('%b %d') }}</span>
+                        <span>End: {{ event.end_date.strftime('%b %d, %Y') }}</span>
+                    </div>
+                    
+                    <hr class="my-3">
+                    
+                    <h6 class="mb-3">Registration Status</h6>
+                    <div class="mb-2 d-flex justify-content-between">
+                        <span>Open Slots:</span>
+                        <strong>{{ event.capacity - event.registration_count }} of {{ event.capacity or '∞' }}</strong>
+                    </div>
+                    <div class="progress mb-3" style="height: 10px;">
+                        <div class="progress-bar bg-info" role="progressbar" 
+                             style="width: {{ (event.registration_count / event.capacity * 100) if event.capacity else 100 }}%;"
+                             aria-valuenow="{{ event.registration_count }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="{{ event.capacity or 100 }}">
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between small text-muted">
+                        <span>Opens: {{ event.registration_start|default('N/A') }}</span>
+                        <span>Closes: {{ event.registration_deadline|default('N/A') }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Event Team -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Event Team</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-column gap-2">
+                        {% for member in event_team %}
+                        <div class="d-flex align-items-center p-2 border rounded">
+                            <img src="{{ url_for('static', filename='uploads/profiles/' + member.user.profile_pic) if member.user.profile_pic 
+                                else url_for('static', filename='images/default-avatar.png') }}" 
+                                 class="rounded-circle me-2" width="40" height="40" 
+                                 alt="{{ member.user.full_name }}">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0">{{ member.user.full_name }}</h6>
+                                <small class="text-muted">{{ member.role }}</small>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                        type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#">Edit Role</a></li>
+                                    <li><a class="dropdown-item text-danger" href="#">Remove</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-3">
+                            <p class="text-muted mb-2">No team members added yet</p>
+                            <button class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-plus"></i> Add Team Member
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportModalLabel">Export Event Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="exportForm">
+                    <div class="mb-3">
+                        <label for="exportFormat" class="form-label">Format</label>
+                        <select class="form-select" id="exportFormat">
+                            <option value="csv">CSV</option>
+                            <option value="excel">Excel</option>
+                            <option value="pdf">PDF</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Data to Include</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="exportRegistrations" checked>
+                            <label class="form-check-label" for="exportRegistrations">
+                                Registrations
+                            </label>
+                        </div>
+                        {% if event.is_team_event %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="exportTeams" checked>
+                            <label class="form-check-label" for="exportTeams">
+                                Teams
+                            </label>
+                        </div>
+                        {% endif %}
+                        {% if event.requires_abstract %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="exportAbstracts">
+                            <label class="form-check-label" for="exportAbstracts">
+                                Abstracts
+                            </label>
+                        </div>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">
+                    <i class="bi bi-download me-1"></i> Export
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="emailParticipantsModal" tabindex="-1" aria-labelledby="emailParticipantsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="emailParticipantsModalLabel">Email Participants</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="emailParticipantsForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="emailRecipients" class="form-label">Recipients</label>
+                            <select class="form-select" id="emailRecipients" multiple>
+                                <option value="all" selected>All Participants</option>
+                                <option value="registered">Registered Only</option>
+                                <option value="pending">Pending Approval</option>
+                                {% if event.is_team_event %}
+                                <option value="team_leaders">Team Leaders Only</option>
+                                {% endif %}
+                                <option value="custom">Custom List</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="emailTemplate" class="form-label">Template</label>
+                            <select class="form-select" id="emailTemplate">
+                                <option value="">Custom Message</option>
+                                <option value="welcome">Welcome Email</option>
+                                <option value="reminder">Event Reminder</option>
+                                <option value="update">Event Update</option>
+                                <option value="certificate">Certificate Available</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailSubject" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="emailSubject" 
+                               value="{{ event.title }} - Important Update">
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailMessage" class="form-label">Message</label>
+                        <textarea class="form-control" id="emailMessage" rows="8"></textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="includeEventDetails">
+                        <label class="form-check-label" for="includeEventDetails">
+                            Include event details in the email
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">
+                    <i class="bi bi-send me-1"></i> Send Email
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteEventModal" tabindex="-1" aria-labelledby="deleteEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger" id="deleteEventModalLabel">Delete Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone. All event data will be permanently deleted.
+                </div>
+                <p>Are you sure you want to delete the event "{{ event.title }}"?</p>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="confirmDelete">
+                    <label class="form-check-label" for="confirmDelete">
+                        I understand that this action cannot be undone
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+                    <i class="bi bi-trash me-1"></i> Delete Event
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab functionality for event overview
+        const descriptionTab = document.getElementById('descriptionTab');
+        const scheduleTab = document.getElementById('scheduleTab');
+        const resourcesTab = document.getElementById('resourcesTab');
+        
+        const descriptionContent = document.getElementById('descriptionContent');
+        const scheduleContent = document.getElementById('scheduleContent');
+        const resourcesContent = document.getElementById('resourcesContent');
+        
+        function showTab(tabName) {
+            // Hide all content
+            descriptionContent.style.display = 'none';
+            scheduleContent.style.display = 'none';
+            resourcesContent.style.display = 'none';
+            
+            // Remove active class from all tabs
+            descriptionTab.classList.remove('active');
+            scheduleTab.classList.remove('active');
+            resourcesTab.classList.remove('active');
+            
+            // Show selected content and set active tab
+            if (tabName === 'description') {
+                descriptionContent.style.display = 'block';
+                descriptionTab.classList.add('active');
+            } else if (tabName === 'schedule') {
+                scheduleContent.style.display = 'block';
+                scheduleTab.classList.add('active');
+            } else if (tabName === 'resources') {
+                resourcesContent.style.display = 'block';
+                resourcesTab.classList.add('active');
+            }
+        }
+        
+        // Add event listeners
+        descriptionTab.addEventListener('click', () => showTab('description'));
+        scheduleTab.addEventListener('click', () => showTab('schedule'));
+        resourcesTab.addEventListener('click', () => showTab('resources'));
+        
+        // Delete confirmation
+        const confirmDelete = document.getElementById('confirmDelete');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        
+        if (confirmDelete && confirmDeleteBtn) {
+            confirmDelete.addEventListener('change', function() {
+                confirmDeleteBtn.disabled = !this.checked;
+            });
+            
+            confirmDeleteBtn.addEventListener('click', function() {
+                // Add your delete logic here
+                alert('Event deletion would be processed here.');
+                // Then close the modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('deleteEventModal'));
+                modal.hide();
+            });
+        }
+        
+        // Toggle event status
+        const eventStatusToggle = document.getElementById('eventStatusToggle');
+        if (eventStatusToggle) {
+            eventStatusToggle.addEventListener('change', function() {
+                // Add your status update logic here
+                const newStatus = this.checked ? 'active' : 'inactive';
+                console.log(`Event status changed to: ${newStatus}`);
+                // You would typically make an AJAX call to update the status
+            });
+        }
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,405 @@
+{% extends "base.html" %}
+
+{% block title %}Review Abstract - {{ submission.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="header-section mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="dashboard-title">
+                            <i class="fas fa-gavel me-2"></i>
+                            Review Abstract
+                        </h1>
+                        <p class="text-muted">{{ submission.event_title }}</p>
+                    </div>
+                    <a href="{{ url_for('event_manager.manage_abstracts', event_id=submission.event_id) }}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Abstracts
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Main Content -->
+                <div class="col-md-8">
+                    <!-- Abstract Details -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Abstract Submission</h5>
+                            <span class="badge bg-{{ 'success' if submission.status == 'approved' 
+                                                    else 'warning' if submission.status == 'draft' 
+                                                    else 'info' if submission.status == 'submitted'
+                                                    else 'secondary' if submission.status == 'under_review'
+                                                    else 'primary' if submission.status == 'revision_required'
+                                                    else 'danger' }} fs-6">
+                                {{ submission.status|replace('_', ' ')|title }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <!-- Title -->
+                            <div class="mb-4">
+                                <h4 class="text-primary">{{ submission.title }}</h4>
+                            </div>
+
+                            <!-- Abstract Text -->
+                            <div class="mb-4">
+                                <h6>Abstract:</h6>
+                                <div class="p-3 bg-light rounded">
+                                    <p class="mb-0" style="white-space: pre-wrap; line-height: 1.6;">{{ submission.abstract_text }}</p>
+                                </div>
+                            </div>
+
+                            <!-- File Download -->
+                            {% if submission.file_path %}
+                            <div class="mb-4">
+                                <h6>Attached File:</h6>
+                                <a href="{{ url_for('static', filename=submission.file_path|replace('static/','', 1)) }}" 
+                                   class="btn btn-outline-primary" target="_blank">
+                                    <i class="fas fa-download me-1"></i>
+                                    Download {{ submission.file_name }}
+                                    <small class="text-muted">({{ (submission.file_size / 1024 / 1024)|round(2) }} MB)</small>
+                                </a>
+                            </div>
+                            {% endif %}
+
+                            <!-- Current Feedback -->
+                            {% if submission.feedback %}
+                            <div class="mb-4">
+                                <h6>Previous Feedback:</h6>
+                                <div class="alert alert-info">
+                                    <p class="mb-0">{{ submission.feedback }}</p>
+                                    {% if submission.reviewed_at %}
+                                    <hr>
+                                    <small class="text-muted">
+                                        Reviewed on {{ submission.reviewed_at|format_datetime }}
+                                        {% if submission.reviewed_by_name %}by {{ submission.reviewed_by_name }}{% endif %}
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Review Form -->
+                    {% if submission.status in ['submitted', 'under_review', 'revision_required'] %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Review Decision</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" id="reviewForm">
+                                <!-- Feedback -->
+                                <div class="mb-4">
+                                    <label for="feedback" class="form-label">Feedback <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="feedback" name="feedback" rows="6" required
+                                              placeholder="Provide detailed feedback to the student...">{{ submission.feedback if submission.status == 'revision_required' else '' }}</textarea>
+                                    <div class="form-text">Provide constructive feedback to help the student improve their abstract</div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="d-flex gap-2">
+                                    <button type="submit" name="action" value="approve" class="btn btn-success">
+                                        <i class="fas fa-check me-1"></i>Approve
+                                    </button>
+                                    <button type="submit" name="action" value="request_revision" class="btn btn-warning">
+                                        <i class="fas fa-edit me-1"></i>Request Revision
+                                    </button>
+                                    <button type="submit" name="action" value="reject" class="btn btn-danger">
+                                        <i class="fas fa-times me-1"></i>Reject
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Submission History -->
+                    {% if history %}
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Version History</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                {% for version in history %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker">
+                                        <span class="badge bg-primary">v{{ version.version }}</span>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">{{ version.title }}</h6>
+                                        <p class="text-muted mb-2">{{ version.changes_summary or 'Version ' + version.version|string }}</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                {{ version.word_count }} words • {{ version.created_at|format_datetime }}
+                                            </small>
+                                            {% if version.file_path %}
+                                            <a href="{{ url_for('static', filename=version.file_path|replace('static/','', 1)) }}" 
+                                               class="btn btn-sm btn-outline-primary" target="_blank">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-md-4">
+                    <!-- Submission Info -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Submission Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>Student:</strong><br>
+                                {{ submission.full_name or submission.username }}<br>
+                                <small class="text-muted">{{ submission.email }}</small>
+                            </div>
+                            
+                            {% if submission.team_name %}
+                            <div class="mb-3">
+                                <strong>Team:</strong><br>
+                                <span class="badge bg-info">{{ submission.team_name }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                <strong>Word Count:</strong><br>
+                                <span class="{% if submission.word_count < 150 or submission.word_count > 500 %}text-danger{% else %}text-success{% endif %}">
+                                    {{ submission.word_count }} words
+                                </span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Version:</strong><br>
+                                {{ submission.version }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Submitted:</strong><br>
+                                {% if submission.submitted_at %}
+                                {{ submission.submitted_at|format_datetime }}
+                                {% else %}
+                                <span class="text-muted">Draft</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if submission.plagiarism_score is not none %}
+                            {% set plagiarism_percent = (submission.plagiarism_score * 100)|round(1) %}
+                            {% set threshold_percent = submission.plagiarism_threshold or 80 %}
+                            <div class="mb-3">
+                                <strong>Plagiarism Score:</strong><br>
+                                <span class="{% if plagiarism_percent > threshold_percent %}text-danger{% else %}text-success{% endif %}">
+                                    {{ plagiarism_percent }}%
+                                </span>
+                                {% if plagiarism_percent > threshold_percent %}
+                                <br><small class="text-danger">Above threshold</small>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Review Guidelines -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Review Guidelines</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="text-success"><i class="fas fa-check me-2"></i>Approve if:</h6>
+                            <ul class="list-unstyled mb-3">
+                                <li><i class="fas fa-check text-success me-2"></i>Clear and well-structured</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Meets word count requirements</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Relevant to event theme</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Original content</li>
+                            </ul>
+                            
+                            <h6 class="text-warning"><i class="fas fa-edit me-2"></i>Request Revision if:</h6>
+                            <ul class="list-unstyled mb-3">
+                                <li><i class="fas fa-edit text-warning me-2"></i>Minor improvements needed</li>
+                                <li><i class="fas fa-edit text-warning me-2"></i>Unclear sections</li>
+                                <li><i class="fas fa-edit text-warning me-2"></i>Formatting issues</li>
+                            </ul>
+                            
+                            <h6 class="text-danger"><i class="fas fa-times me-2"></i>Reject if:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-times text-danger me-2"></i>Off-topic or irrelevant</li>
+                                <li><i class="fas fa-times text-danger me-2"></i>Plagiarized content</li>
+                                <li><i class="fas fa-times text-danger me-2"></i>Poor quality or incomplete</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary btn-sm" onclick="insertTemplate('strong_approve')">
+                                    <i class="fas fa-thumbs-up me-1"></i>Strong Approval
+                                </button>
+                                <button class="btn btn-outline-warning btn-sm" onclick="insertTemplate('minor_revision')">
+                                    <i class="fas fa-edit me-1"></i>Minor Revision
+                                </button>
+                                <button class="btn btn-outline-info btn-sm" onclick="insertTemplate('clarification')">
+                                    <i class="fas fa-question me-1"></i>Need Clarification
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="clearFeedback()">
+                                    <i class="fas fa-eraser me-1"></i>Clear Feedback
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Feedback templates
+const templates = {
+    strong_approve: "Excellent abstract! Your work demonstrates a clear understanding of the topic and presents innovative ideas. The structure is well-organized and the content is engaging. Approved without any changes needed.",
+    
+    minor_revision: "Good work overall! Your abstract shows promise but needs some minor improvements:\n\n1. [Specific area for improvement]\n2. [Another area if needed]\n\nPlease address these points and resubmit. The core idea is solid.",
+    
+    clarification: "Thank you for your submission. Your abstract has potential, but I need clarification on the following points:\n\n1. [Specific question or unclear area]\n2. [Another area needing clarification]\n\nPlease revise to address these areas for better clarity."
+};
+
+function insertTemplate(templateKey) {
+    const feedbackTextarea = document.getElementById('feedback');
+    const template = templates[templateKey];
+    
+    if (feedbackTextarea.value.trim() === '') {
+        feedbackTextarea.value = template;
+    } else {
+        if (confirm('This will replace your current feedback. Continue?')) {
+            feedbackTextarea.value = template;
+        }
+    }
+    
+    feedbackTextarea.focus();
+}
+
+function clearFeedback() {
+    const feedbackTextarea = document.getElementById('feedback');
+    if (feedbackTextarea.value.trim() !== '') {
+        if (confirm('Are you sure you want to clear the feedback?')) {
+            feedbackTextarea.value = '';
+            feedbackTextarea.focus();
+        }
+    }
+}
+
+// Form validation
+document.getElementById('reviewForm')?.addEventListener('submit', function(e) {
+    const feedback = document.getElementById('feedback').value.trim();
+    const action = e.submitter.value;
+    
+    if (feedback === '') {
+        e.preventDefault();
+        alert('Please provide feedback before submitting your review.');
+        return false;
+    }
+    
+    if (feedback.length < 10) {
+        e.preventDefault();
+        alert('Please provide more detailed feedback (at least 10 characters).');
+        return false;
+    }
+    
+    const actionText = action === 'approve' ? 'approve' : 
+                      action === 'reject' ? 'reject' : 'request revision for';
+    
+    if (!confirm(`Are you sure you want to ${actionText} this abstract?`)) {
+        e.preventDefault();
+        return false;
+    }
+});
+
+// Character counter for feedback
+document.getElementById('feedback')?.addEventListener('input', function() {
+    const maxLength = 1000;
+    const currentLength = this.value.length;
+    const remaining = maxLength - currentLength;
+    
+    // Find or create character counter
+    let counter = document.getElementById('feedback-counter');
+    if (!counter) {
+        counter = document.createElement('div');
+        counter.id = 'feedback-counter';
+        counter.className = 'form-text text-end';
+        this.parentNode.appendChild(counter);
+    }
+    
+    counter.textContent = `${currentLength}/${maxLength} characters`;
+    counter.className = remaining < 100 ? 'form-text text-end text-warning' : 'form-text text-end text-muted';
+});
+</script>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    top: 0;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: -15px;
+    top: 30px;
+    width: 2px;
+    height: calc(100% - 10px);
+    background: #dee2e6;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid #007bff;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.btn-group .btn {
+    margin-right: 0.5rem;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends '_base.html' %}
+
+{% block title %}My Assignments · CampusConnect{% endblock %}
+
+{% block head_extra %}
+<style>
+  .assignments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+  .assignment-card {
+    background: var(--card-bg, var(--gray-50));
+    color: var(--card-fg, var(--gray-900));
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--card-border, var(--gray-200));
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 200px;
+    text-align: left; /* ensure content is left-aligned */
+  }
+  .assignment-card:hover {
+    background: var(--violet-surface-2, var(--gray-100));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  .assignment-content { flex-grow: 1; }
+  .assignment-actions { margin-top: 1rem; display: flex; justify-content: flex-end; }
+  .card-title { color: var(--heading-color, var(--gray-900)); }
+  .muted { color: var(--muted-color, var(--gray-600)); }
+
+  @media (max-width: 768px) {
+    .assignments-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Dark mode overrides */
+  @media (prefers-color-scheme: dark) {
+    .assignment-card {
+      background: var(--card-bg-dark, var(--gray-800));
+      color: var(--card-fg-dark, var(--gray-100));
+      border-color: var(--card-border-dark, var(--gray-700));
+    }
+    .assignment-card:hover {
+      background: var(--gray-700);
+    }
+    .card-title { color: var(--heading-color-dark, #fff); }
+    .muted { color: var(--muted-color-dark, var(--gray-400)); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <header class="header header--brand" role="banner">
+    <h1 class="header-title">My Assignments</h1>
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('chatbot') }}">Chatbot</a>
+      <a href="{{ url_for('auth.logout') }}" class="text-red-600">Logout</a>
+    </nav>
+  </header>
+
+  <main class="container" role="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-4">
+          {% for category, message in messages %}
+            <div class="alert {{ 'alert-danger' if category == 'danger' else 'alert-success' }}" role="alert">
+              <p class="font-bold">{{ category.capitalize() }}</p>
+              <p>{{ message }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <h2 class="text-center mb-6">Assignments I've Created</h2>
+
+    <div class="flex justify-center mb-6">
+      <a href="{{ url_for('faculty.create_assignment') }}" class="btn btn-primary btn-lg mi-press">Create New Assignment</a>
+    </div>
+
+    <div class="assignments-grid">
+      {% if not assignments %}
+        <div class="col-span-full">
+          <p class="text-center italic muted">You have not created any assignments yet.</p>
+        </div>
+      {% else %}
+        {% for assignment in assignments %}
+          <div class="assignment-card mi-elevate mi-glow">
+            <div class="assignment-content">
+              <h3 class="card-title mb-2">{{ assignment.title }}</h3>
+              <p>{{ assignment.description }}</p>
+              <p class="text-sm muted">Share Code: <strong>{{ assignment.code }}</strong></p>
+            </div>
+            <div class="assignment-actions">
+              <a href="{{ url_for('faculty.view_submissions', assignment_id=assignment.id) }}" class="btn btn-success mi-press mi-link">View Submissions</a>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </main>
+{% endblock %}

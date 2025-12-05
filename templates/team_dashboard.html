@@ -1,0 +1,465 @@
+{% extends "base.html" %}
+
+{% block title %}{{ team.name }} - Team Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="header-section mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="dashboard-title">
+                            <i class="fas fa-users me-2"></i>
+                            {{ team.name }}
+                        </h1>
+                        <p class="text-muted">{{ team.event_title }} - {{ team.event_type|title }}</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        {% if is_leader %}
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#inviteModal">
+                            <i class="fas fa-user-plus me-1"></i>Invite Member
+                        </button>
+                        {% endif %}
+                        <a href="{{ url_for('events.event_details', event_id=team.event_id) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Event
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Team Information -->
+                <div class="col-md-8">
+                    <!-- Team Details Card -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Team Information</h5>
+                            <span class="badge bg-{{ 'success' if team.status == 'active' else 'warning' if team.status == 'forming' else 'secondary' }}">
+                                {{ team.status|title }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Team Leader:</strong> {{ team.leader_full_name or team.leader_name }}</p>
+                                    <p><strong>Members:</strong> {{ members|length }}/{{ team.max_members }}</p>
+                                    <p><strong>Team Code:</strong> 
+                                        <code>{{ team.team_code }}</code>
+                                        <button class="btn btn-sm btn-outline-secondary ms-2" onclick="copyToClipboard('{{ team.team_code }}')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Created:</strong> {{ team.created_at|format_datetime }}</p>
+                                    <p><strong>Event:</strong> {{ team.event_title }}</p>
+                                    <p><strong>Visibility:</strong> 
+                                        {% if team.is_public %}
+                                            <span class="badge bg-success">Public</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Private</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            {% if team.description %}
+                            <hr>
+                            <p><strong>Description:</strong></p>
+                            <p class="text-muted">{{ team.description }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Abstract Submission Card -->
+                    {% if event_requirements and event_requirements.requires_abstract %}
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Abstract Submission</h5>
+                            {% if abstract_submission %}
+                            <span class="badge bg-{{ 'success' if abstract_submission.status == 'approved' 
+                                                    else 'warning' if abstract_submission.status == 'draft' 
+                                                    else 'info' if abstract_submission.status == 'submitted'
+                                                    else 'danger' }}">
+                                {{ abstract_submission.status|replace('_', ' ')|title }}
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary">Not Submitted</span>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            {% if abstract_submission %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Title:</strong> {{ abstract_submission.title }}</p>
+                                        <p><strong>Word Count:</strong> {{ abstract_submission.word_count }} words</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Submitted:</strong> {{ abstract_submission.submitted_at|format_datetime if abstract_submission.submitted_at else 'Draft' }}</p>
+                                        <p><strong>Version:</strong> {{ abstract_submission.version }}</p>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url_for('abstracts.view_submission', submission_id=abstract_submission.id) }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>View Abstract
+                                    </a>
+                                    {% if abstract_submission.status in ['draft', 'revision_required'] and is_leader %}
+                                    <a href="{{ url_for('abstracts.submit_abstract', event_id=team.event_id) }}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Edit Abstract
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                {% if abstract_submission.feedback %}
+                                <hr>
+                                <div class="alert alert-info">
+                                    <strong>Feedback:</strong><br>
+                                    {{ abstract_submission.feedback }}
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                <p class="text-muted">No abstract has been submitted yet.</p>
+                                {% if is_leader %}
+                                <a href="{{ url_for('abstracts.submit_abstract', event_id=team.event_id) }}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-1"></i>Submit Abstract
+                                </a>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Team Activities -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activities</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if activities %}
+                            <div class="timeline">
+                                {% for activity in activities %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker">
+                                        <i class="fas fa-{{ 'user-plus' if activity.activity_type == 'joined' 
+                                                           else 'user-minus' if activity.activity_type == 'left'
+                                                           else 'envelope' if activity.activity_type == 'invited'
+                                                           else 'file-alt' if 'abstract' in activity.activity_type
+                                                           else 'tasks' if 'task' in activity.activity_type
+                                                           else 'info' }}"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">{{ activity.full_name or activity.username }}</h6>
+                                        <p class="mb-1">{{ activity.description }}</p>
+                                        <small class="text-muted">{{ activity.created_at|format_datetime }}</small>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted">No recent activities.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-md-4">
+                    <!-- Team Members -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-users me-2"></i>Team Members</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for member in members %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="avatar-sm me-3">
+                                    {% if member.profile_picture %}
+                                    <img src="{{ url_for('static', filename=member.profile_picture) }}" 
+                                         alt="{{ member.full_name or member.username }}" class="rounded-circle">
+                                    {% else %}
+                                    <div class="avatar-placeholder">
+                                        {{ (member.full_name or member.username)[0]|upper }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0">{{ member.full_name or member.username }}</h6>
+                                    <small class="text-muted">{{ member.department or 'Student' }}</small>
+                                    {% if member.role == 'leader' %}
+                                    <span class="badge bg-primary ms-2">Leader</span>
+                                    {% endif %}
+                                </div>
+                                {% if is_leader and member.user_id != user.id %}
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                            data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" onclick="removeMember({{ member.user_id }})">
+                                            <i class="fas fa-user-minus me-2"></i>Remove from Team
+                                        </a></li>
+                                        {% if member.role != 'leader' %}
+                                        <li><a class="dropdown-item" href="#" onclick="promoteToLeader({{ member.user_id }})">
+                                            <i class="fas fa-crown me-2"></i>Make Leader
+                                        </a></li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Pending Invitations -->
+                    {% if pending_invitations %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Pending Invitations</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for invitation in pending_invitations %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <small class="text-muted">{{ invitation.invitee_email }}</small><br>
+                                    <small class="text-muted">Invited {{ invitation.created_at|format_datetime }}</small>
+                                </div>
+                                {% if is_leader %}
+                                <button class="btn btn-sm btn-outline-danger" onclick="cancelInvitation({{ invitation.id }})">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Team Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Team Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                {% if not is_leader %}
+                                <button class="btn btn-outline-danger" onclick="leaveTeam()">
+                                    <i class="fas fa-sign-out-alt me-1"></i>Leave Team
+                                </button>
+                                {% else %}
+                                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#shareModal">
+                                    <i class="fas fa-share me-1"></i>Share Team
+                                </button>
+                                <a href="{{ url_for('teams.view_join_requests', team_id=team.id) }}" class="btn btn-outline-info">
+                                    <i class="fas fa-user-clock me-1"></i>Join Requests
+                                    {% if pending_requests_count %}
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {{ pending_requests_count }}
+                                        </span>
+                                    {% endif %}
+                                </a>
+                                <button class="btn btn-outline-warning" onclick="editTeam()">
+                                    <i class="fas fa-edit me-1"></i>Edit Team
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Invite Member Modal -->
+{% if is_leader %}
+<div class="modal fade" id="inviteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Invite Team Member</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('teams.invite_member', team_id=team.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="invitee_email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="invitee_email" name="invitee_email" required>
+                        <div class="form-text">Enter the email address of the student you want to invite</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Personal Message (Optional)</label>
+                        <textarea class="form-control" id="message" name="message" rows="3" 
+                                  placeholder="Add a personal message to your invitation..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-1"></i>Send Invitation
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Share Team Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Share Team</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Share your team code with others so they can request to join:</p>
+                <div class="input-group">
+                    <input type="text" class="form-control" value="{{ team.team_code }}" readonly id="teamCodeInput">
+                    <button class="btn btn-outline-secondary" onclick="copyToClipboard('{{ team.team_code }}')">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <hr>
+                <p>Or share the invitation link:</p>
+                <div class="input-group">
+                    <input type="text" class="form-control" 
+                           value="{{ url_for('teams.team_dashboard', team_id=team.id, _external=True) }}" 
+                           readonly id="teamLinkInput">
+                    <button class="btn btn-outline-secondary" 
+                            onclick="copyToClipboard('{{ url_for('teams.team_dashboard', team_id=team.id, _external=True) }}')">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Show success message
+        const toast = document.createElement('div');
+        toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3';
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    Copied to clipboard!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        setTimeout(() => toast.remove(), 3000);
+    });
+}
+
+function leaveTeam() {
+    if (confirm('Are you sure you want to leave this team? This action cannot be undone.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ url_for("teams.leave_team", team_id=team.id) }}';
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function removeMember(userId) {
+    if (confirm('Are you sure you want to remove this member from the team?')) {
+        // Implementation for removing member
+        console.log('Remove member:', userId);
+    }
+}
+
+function promoteToLeader(userId) {
+    if (confirm('Are you sure you want to transfer team leadership to this member?')) {
+        // Implementation for promoting to leader
+        console.log('Promote to leader:', userId);
+    }
+}
+
+function cancelInvitation(invitationId) {
+    if (confirm('Are you sure you want to cancel this invitation?')) {
+        // Implementation for canceling invitation
+        console.log('Cancel invitation:', invitationId);
+    }
+}
+
+function editTeam() {
+    // Implementation for editing team details
+    console.log('Edit team');
+}
+</script>
+
+<style>
+.avatar-sm {
+    width: 40px;
+    height: 40px;
+}
+
+.avatar-sm img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: bold;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    background: #007bff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: -21px;
+    top: 20px;
+    width: 2px;
+    height: calc(100% + 20px);
+    background: #dee2e6;
+}
+
+.timeline-content h6 {
+    color: #495057;
+}
+</style>
+{% endblock %}
